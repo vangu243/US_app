@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>US — Together Apart</title>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --rouge:#7a1f2e;--rouge2:#a83248;--or:#c9966a;--or2:#e8c49a;
+      --creme:#fdf6ee;--creme2:#f5e9d8;--brun:#2e1a12;--brun2:#4a2e1e;
+      --gris:#9a8070;--blanc:#fffdf9;--vert:#2d7a4f;--bleu:#1a4a7a;
+      --radius:16px;--shadow:0 8px 32px rgba(46,26,18,.12);
+    }
+    html{scroll-behavior:smooth}
+    body{font-family:Georgia,serif;background:var(--creme);color:var(--brun);min-height:100vh;overflow-x:hidden}
+
+    /* AUTH */
+    #auth-screen{position:fixed;inset:0;z-index:9999;background:linear-gradient(160deg,#1a0a0f,#2e1a12);display:flex;align-items:center;justify-content:center;padding:24px}
+    .auth-card{background:rgba(253,246,238,.04);border:1px solid rgba(201,150,106,.2);border-radius:24px;padding:36px 28px;width:100%;max-width:400px;backdrop-filter:blur(20px)}
+    .auth-logo{text-align:center;margin-bottom:28px}
+    .auth-logo h1{font-size:3.5rem;font-style:italic;color:var(--or)}
+    .auth-logo p{font-size:.55rem;letter-spacing:.4em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-top:4px}
+    .auth-tabs{display:flex;border:1px solid rgba(201,150,106,.2);border-radius:30px;margin-bottom:24px;overflow:hidden}
+    .auth-tab{flex:1;padding:10px;text-align:center;background:transparent;border:none;font-family:inherit;font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.4);cursor:pointer;transition:all .3s}
+    .auth-tab.active{background:var(--or);color:var(--brun)}
+    .auth-form{display:flex;flex-direction:column;gap:12px}
+    .auth-fg{display:flex;flex-direction:column;gap:4px}
+    .auth-fg label{font-size:.5rem;letter-spacing:.22em;text-transform:uppercase;color:var(--or);font-family:sans-serif}
+    .auth-fg input{background:rgba(255,255,255,.06);border:1px solid rgba(201,150,106,.2);color:#fff;padding:12px 14px;font-family:inherit;font-size:.82rem;outline:none;border-radius:10px;transition:border-color .3s}
+    .auth-fg input:focus{border-color:var(--or)}
+    .auth-fg input::placeholder{color:rgba(255,255,255,.25)}
+    .auth-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .auth-submit{padding:13px;background:var(--or);border:none;color:var(--brun);font-family:inherit;font-size:.68rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;border-radius:30px;cursor:pointer;transition:all .3s;margin-top:4px}
+    .auth-submit:hover{background:var(--or2);transform:translateY(-1px)}
+    .auth-note{text-align:center;font-size:.52rem;color:rgba(255,255,255,.2);margin-top:6px}
+    .auth-hearts{text-align:center;font-size:1.8rem;margin-bottom:14px;animation:hb 2s infinite}
+    @keyframes hb{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+
+    /* APP */
+    #app{display:none}
+    .nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(253,246,238,.96);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,150,106,.2)}
+    .nav-logo{font-size:1.3rem;font-weight:700;font-style:italic;color:var(--rouge)}
+    .nav-logo span{color:var(--or)}
+    .nav-level{display:flex;align-items:center;gap:6px;font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:var(--or);font-family:sans-serif}
+    .nav-badge{background:var(--rouge);color:#fff;padding:3px 10px;border-radius:20px;font-size:.48rem}
+    .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;background:rgba(253,246,238,.97);backdrop-filter:blur(12px);border-top:1px solid rgba(201,150,106,.2)}
+    .bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 4px;background:transparent;border:none;cursor:pointer;transition:all .3s}
+    .bnav-btn .bi{font-size:1.2rem;transition:transform .3s}
+    .bnav-btn .bl{font-size:.4rem;letter-spacing:.08em;text-transform:uppercase;color:var(--gris);font-family:sans-serif}
+    .bnav-btn.active .bi{transform:scale(1.15)}
+    .bnav-btn.active .bl{color:var(--rouge);font-weight:700}
+    .page{display:none;padding:66px 0 76px;min-height:100vh}
+    .page.active{display:block}
+    .container{max-width:700px;margin:0 auto;padding:0 18px}
+    .s-header{text-align:center;margin-bottom:24px;padding-top:8px}
+    .s-eye{font-size:.5rem;letter-spacing:.38em;text-transform:uppercase;color:var(--or);margin-bottom:6px;font-family:sans-serif}
+    .s-title{font-size:clamp(1.5rem,4vw,2.1rem);font-style:italic;color:var(--rouge);line-height:1.15}
+    .card{background:var(--blanc);border:1px solid var(--creme2);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+    .btn-p{padding:11px 26px;background:var(--rouge);color:#fff;border:none;border-radius:30px;cursor:pointer;font-family:inherit;font-size:.65rem;letter-spacing:.16em;text-transform:uppercase;transition:all .3s}
+    .btn-p:hover{background:var(--rouge2);transform:translateY(-1px)}
+    .btn-s{padding:10px 22px;background:transparent;border:1px solid var(--or);color:var(--or);border-radius:30px;cursor:pointer;font-family:inherit;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;transition:all .3s}
+    .btn-s:hover{background:var(--or);color:var(--brun)}
+    .toast{position:fixed;bottom:86px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--brun);color:var(--or2);padding:9px 18px;border-radius:20px;font-size:.62rem;letter-spacing:.1em;opacity:0;transition:all .3s;z-index:8000;white-space:nowrap;pointer-events:none}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .jeu-back{display:flex;align-items:center;gap:6px;background:none;border:none;font-family:inherit;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gris);cursor:pointer;padding:10px 0;margin-bottom:6px}
+    .sub-screen{display:none}
+    .sub-screen.active{display:block}
+  </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<!-- AUTH -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo"><h1>US</h1><p>Together, even apart</p></div>
+    <div class="auth-hearts">♥</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuth('signup',this)">Créer un compte</button>
+      <button class="auth-tab" onclick="switchAuth('login',this)">Se connecter</button>
+    </div>
+    <div id="auth-signup" class="auth-form">
+      <div class="auth-row">
+        <div class="auth-fg"><label>Ton prénom</label><input id="s-n1" placeholder="Mignon" maxlength="12"/></div>
+        <div class="auth-fg"><label>Son prénom</label><input id="s-n2" placeholder="Cléopâtre" maxlength="12"/></div>
+      </div>
+      <div class="auth-fg"><label>Email</label><input type="email" id="s-email" placeholder="vous@email.com"/></div>
+      <div class="auth-fg"><label>Mot de passe</label><input type="password" id="s-pwd" placeholder="••••••••"/></div>
+      <div class="auth-fg"><label>Retrouvailles (optionnel)</label><input type="date" id="s-reunion"/></div>
+      <button class="auth-submit" onclick="doSignup()">Créer notre espace ♥</button>
+      <p class="auth-note">Données sauvegardées sur cet appareil</p>
+    </div>
+    <div id="auth-login" class="auth-form" style="display:none">
+      <div class="auth-fg"><label>Email</label><input type="email" id="l-email" placeholder="vous@email.com"/></div>
+      <div class="auth-fg"><label>Mot de passe</label><input type="password" id="l-pwd" placeholder="••••••••"/></div>
+      <button class="auth-submit" onclick="doLogin()">Se connecter ♥</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <nav class="nav">
+    <div class="nav-logo">U<span>S</span></div>
+    <div class="nav-level"><span id="nav-lvl">Niv.1</span><span class="nav-badge" id="nav-badge">Étincelle</span></div>
+  </nav>
+
+  <!-- PAGE HOME -->
+  <div id="page-home" class="page active" style="background:linear-gradient(160deg,var(--creme),var(--creme2))">
+    <div style="text-align:center;padding:16px 18px 0">
+      <div style="display:flex;align-items:center;justify-content:center;gap:22px;margin-bottom:18px;flex-wrap:wrap">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:7px">
+          <div style="width:78px;height:78px;border-radius:50%;background:linear-gradient(135deg,var(--rouge),var(--rouge2));display:flex;align-items:center;justify-content:center;font-size:1.7rem;color:#fff;border:3px solid var(--or2);box-shadow:0 4px 16px rgba(122,31,46,.2);overflow:hidden;position:relative;cursor:pointer" onclick="document.getElementById('hf1').click()">
+            <span id="he1">🌹</span><img id="hi1" src="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%;opacity:0;transition:opacity .3s"/>
+            <div style="position:absolute;inset:0;background:rgba(0,0,0,.3);border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0">📷</div>
+          </div>
+          <input type="file" id="hf1" accept="image/*" style="display:none" onchange="loadAv(this,'hi1','he1')"/>
+          <div id="hn1" style="font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--brun2);font-family:sans-serif;font-weight:600">Mignon</div>
+        </div>
+        <div style="font-size:1.5rem;color:var(--rouge);animation:hb 2s infinite">♥</div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:7px">
+          <div style="width:78px;height:78px;border-radius:50%;background:linear-gradient(135deg,var(--brun2),var(--or));display:flex;align-items:center;justify-content:center;font-size:1.7rem;color:#fff;border:3px solid var(--or2);box-shadow:0 4px 16px rgba(122,31,46,.2);overflow:hidden;position:relative;cursor:pointer" onclick="document.getElementById('hf2').click()">
+            <span id="he2">🌸</span><img id="hi2" src="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%;opacity:0;transition:opacity .3s"/>
+          </div>
+          <input type="file" id="hf2" accept="image/*" style="display:none" onchange="loadAv(this,'hi2','he2')"/>
+          <div id="hn2" style="font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--brun2);font-family:sans-serif;font-weight:600">Cléopâtre</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Barre niveau -->
+    <div style="background:var(--blanc);border:1px solid var(--creme2);border-radius:12px;padding:12px 16px;margin:0 18px 14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span id="hlb-name" style="font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--rouge);font-family:sans-serif;font-weight:700">✦ Étincelle</span>
+        <span id="hlb-pts" style="font-size:.58rem;color:var(--gris);font-family:sans-serif">0 / 100 XP</span>
+      </div>
+      <div style="height:5px;background:var(--creme2);border-radius:3px;overflow:hidden"><div id="hlb-fill" style="height:100%;background:linear-gradient(90deg,var(--rouge),var(--or));border-radius:3px;width:0%;transition:width 1s ease"></div></div>
+    </div>
+
+    <!-- Météo -->
+    <div style="background:var(--blanc);border:1px solid var(--creme2);border-radius:var(--radius);padding:16px;margin:0 18px 14px">
+      <div style="font-size:.5rem;letter-spacing:.28em;text-transform:uppercase;color:var(--or);margin-bottom:10px;font-family:sans-serif">💭 Météo intérieure aujourd'hui</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+        <button class="meteo-btn" onclick="setMeteo(this,'☀️')">☀️</button>
+        <button class="meteo-btn" onclick="setMeteo(this,'🌤')">🌤</button>
+        <button class="meteo-btn" onclick="setMeteo(this,'🌧')">🌧</button>
+        <button class="meteo-btn" onclick="setMeteo(this,'⛈️')">⛈️</button>
+        <button class="meteo-btn" onclick="setMeteo(this,'🌈')">🌈</button>
+        <button class="meteo-btn" onclick="setMeteo(this,'🌙')">🌙</button>
+        <button class="meteo-btn" onclick="setMeteo(this,'🔥')">🔥</button>
+        <button class="meteo-btn" onclick="setMeteo(this,'❄️')">❄️</button>
+      </div>
+      <div style="display:flex;justify-content:space-around">
+        <div style="text-align:center"><div style="font-size:.45rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gris);font-family:sans-serif;margin-bottom:3px" id="mw1">Mignon</div><div id="mi1" style="font-size:1.8rem">—</div></div>
+        <div style="text-align:center"><div style="font-size:.45rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gris);font-family:sans-serif;margin-bottom:3px" id="mw2">Cléopâtre</div><div id="mi2" style="font-size:1.8rem">—</div></div>
+      </div>
+    </div>
+
+    <!-- Countdown -->
+    <div style="background:linear-gradient(135deg,var(--rouge),var(--rouge2));border-radius:var(--radius);padding:18px;margin:0 18px 14px;text-align:center">
+      <div style="font-size:.5rem;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:10px;font-family:sans-serif">⏳ Compte à rebours — Retrouvailles</div>
+      <div style="display:flex;justify-content:center;gap:20px;margin-bottom:12px">
+        <div style="text-align:center"><div id="cd-j" style="font-size:2rem;font-weight:700;color:#fff;font-family:sans-serif">—</div><div style="font-size:.42rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.5);font-family:sans-serif">Jours</div></div>
+        <div style="text-align:center"><div id="cd-h" style="font-size:2rem;font-weight:700;color:#fff;font-family:sans-serif">—</div><div style="font-size:.42rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.5);font-family:sans-serif">Heures</div></div>
+        <div style="text-align:center"><div id="cd-m" style="font-size:2rem;font-weight:700;color:#fff;font-family:sans-serif">—</div><div style="font-size:.42rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.5);font-family:sans-serif">Min</div></div>
+      </div>
+      <input type="date" id="reunion-date" onchange="updateCD()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:7px 12px;border-radius:20px;font-family:inherit;font-size:.68rem;outline:none;cursor:pointer"/>
+    </div>
+
+    <!-- Accès rapide -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:0 18px 18px">
+      <button style="background:var(--blanc);border:1px solid var(--creme2);border-radius:10px;padding:14px 8px;text-align:center;cursor:pointer;transition:all .3s;font-family:inherit" onclick="navTo('jeux')" onmouseover="this.style.borderColor='var(--or)'" onmouseout="this.style.borderColor='var(--creme2)'"><div style="font-size:1.3rem;margin-bottom:4px">💬</div><div style="font-size:.42rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gris);font-family:sans-serif">Questions</div></button>
+      <button style="background:var(--blanc);border:1px solid var(--creme2);border-radius:10px;padding:14px 8px;text-align:center;cursor:pointer;transition:all .3s;font-family:inherit" onclick="navTo('puzzle')" onmouseover="this.style.borderColor='var(--or)'" onmouseout="this.style.borderColor='var(--creme2)'"><div style="font-size:1.3rem;margin-bottom:4px">🧩</div><div style="font-size:.42rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gris);font-family:sans-serif">Puzzle</div></button>
+      <button style="background:var(--blanc);border:1px solid var(--creme2);border-radius:10px;padding:14px 8px;text-align:center;cursor:pointer;transition:all .3s;font-family:inherit" onclick="navTo('niveau')" onmouseover="this.style.borderColor='var(--or)'" onmouseout="this.style.borderColor='var(--creme2)'"><div style="font-size:1.3rem;margin-bottom:4px">🏆</div><div style="font-size:.42rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gris);font-family:sans-serif">Niveaux</div></button>
+      <button style="background:var(--blanc);border:1px solid var(--creme2);border-radius:10px;padding:14px 8px;text-align:center;cursor:pointer;transition:all .3s;font-family:inherit" onclick="navTo('rituels')" onmouseover="this.style.borderColor='var(--or)'" onmouseout="this.style.borderColor='var(--creme2)'"><div style="font-size:1.3rem;margin-bottom:4px">📅</div><div style="font-size:.42rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gris);font-family:sans-serif">Rituels</div></button>
+      <button style="background:var(--blanc);border:1px solid var(--creme2);border-radius:10px;padding:14px 8px;text-align:center;cursor:pointer;transition:all .3s;font-family:inherit" onclick="navTo('memoire')" onmouseover="this.style.borderColor='var(--or)'" onmouseout="this.style.borderColor='var(--creme2)'"><div style="font-size:1.3rem;margin-bottom:4px">💌</div><div style="font-size:.42rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gris);font-family:sans-serif">Mémoire</div></button>
+      <button style="background:var(--blanc);border:1px solid var(--creme2);border-radius:10px;padding:14px 8px;text-align:center;cursor:pointer;transition:all .3s;font-family:inherit" onclick="navTo('jeux');showSub('jeux','radar')" onmouseover="this.style.borderColor='var(--or)'" onmouseout="this.style.borderColor='var(--creme2)'"><div style="font-size:1.3rem;margin-bottom:4px">💫</div><div style="font-size:.42rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gris);font-family:sans-serif">Radar</div></button>
+    </div>
+  </div>
+
+  <!-- PAGE JEUX -->
+  <div id="page-jeux" class="page" style="background:var(--blanc)">
+    <div id="jeux-menu" class="container">
+      <div class="s-header"><p class="s-eye">Jouez ensemble</p><h2 class="s-title">Nos jeux</h2></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div onclick="showSub('jeux','questions')" style="background:var(--creme);border:1px solid var(--creme2);border-radius:var(--radius);padding:18px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='var(--shadow)'" onmouseout="this.style.transform='none';this.style.boxShadow='none'">
+          <div style="font-size:.42rem;position:absolute;top:10px;right:10px;color:var(--or);font-family:sans-serif">10 000+</div>
+          <div style="font-size:1.8rem;margin-bottom:8px">💬</div>
+          <div style="font-style:italic;color:var(--rouge);font-size:.95rem;margin-bottom:5px">Questions</div>
+          <div style="font-size:.6rem;color:var(--gris);line-height:1.6;font-family:sans-serif">13 thèmes pour se découvrir sans fin</div>
+        </div>
+        <div onclick="showSub('jeux','vod')" style="background:var(--creme);border:1px solid var(--creme2);border-radius:var(--radius);padding:18px;cursor:pointer;transition:all .3s;position:relative" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
+          <div style="font-size:.42rem;position:absolute;top:10px;right:10px;color:var(--or);font-family:sans-serif">400+</div>
+          <div style="font-size:1.8rem;margin-bottom:8px">🎭</div>
+          <div style="font-style:italic;color:var(--rouge);font-size:.95rem;margin-bottom:5px">Vérité ou Défi</div>
+          <div style="font-size:.6rem;color:var(--gris);line-height:1.6;font-family:sans-serif">Révélez-vous ou relevez des défis</div>
+        </div>
+        <div onclick="showSub('jeux','humeur')" style="background:var(--creme);border:1px solid var(--creme2);border-radius:var(--radius);padding:18px;cursor:pointer;transition:all .3s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
+          <div style="font-size:1.8rem;margin-bottom:8px">🎯</div>
+          <div style="font-style:italic;color:var(--rouge);font-size:.95rem;margin-bottom:5px">Devine l'humeur</div>
+          <div style="font-size:.6rem;color:var(--gris);line-height:1.6;font-family:sans-serif">Devinez comment l'autre se sent</div>
+        </div>
+        <div onclick="showSub('jeux','jtd')" style="background:var(--creme);border:1px solid var(--creme2);border-radius:var(--radius);padding:18px;cursor:pointer;transition:all .3s;position:relative" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
+          <div style="font-size:.42rem;position:absolute;top:10px;right:10px;color:var(--or);font-family:sans-serif">500+</div>
+          <div style="font-size:1.8rem;margin-bottom:8px">🌸</div>
+          <div style="font-style:italic;color:var(--rouge);font-size:.95rem;margin-bottom:5px">Je t'aurais dit</div>
+          <div style="font-size:.6rem;color:var(--gris);line-height:1.6;font-family:sans-serif">Complétez des phrases ensemble</div>
+        </div>
+        <div onclick="showSub('jeux','radar')" style="background:var(--creme);border:1px solid var(--creme2);border-radius:var(--radius);padding:18px;cursor:pointer;transition:all .3s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
+          <div style="font-size:1.8rem;margin-bottom:8px">💫</div>
+          <div style="font-style:italic;color:var(--rouge);font-size:.95rem;margin-bottom:5px">Radar d'humeur</div>
+          <div style="font-size:.6rem;color:var(--gris);line-height:1.6;font-family:sans-serif">Envoyez un signal doux en un clic</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUESTIONS -->
+    <div id="jeux-questions" class="sub-screen container">
+      <button class="jeu-back" onclick="hideSub('jeux')">← Retour</button>
+      <div id="themes-bar" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px"></div>
+      <div id="q-card" style="background:linear-gradient(135deg,var(--rouge),var(--rouge2));border-radius:var(--radius);padding:28px 24px;text-align:center;margin-bottom:16px;position:relative;overflow:hidden;transition:all .25s">
+        <div style="position:absolute;top:-10px;left:14px;font-size:7rem;color:rgba(255,255,255,.06);font-style:italic;line-height:1">"</div>
+        <div id="q-theme" style="font-size:.46rem;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:6px;font-family:sans-serif">Amour 💕</div>
+        <div id="q-num" style="font-size:.44rem;color:rgba(255,255,255,.3);margin-bottom:12px;font-family:sans-serif">1 / 260</div>
+        <p id="q-text" style="font-size:clamp(.92rem,3vw,1.15rem);color:#fff;line-height:1.65;font-style:italic;position:relative;z-index:1">Si tu pouvais te téléporter chez moi pour 10 minutes là tout de suite, tu ferais quoi ?</p>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-bottom:20px;flex-wrap:wrap">
+        <button class="btn-p" onclick="newQ()">✦ Nouvelle question</button>
+        <button class="btn-s" onclick="newQSameTheme()">🎲 Même thème</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+        <div style="background:var(--creme);border:1px solid var(--creme2);border-radius:12px;padding:14px">
+          <div id="rl1" style="font-size:.48rem;letter-spacing:.2em;text-transform:uppercase;color:var(--or);margin-bottom:7px;font-family:sans-serif;font-weight:600">✦ Réponse de Mignon</div>
+          <textarea id="rep1" style="width:100%;min-height:85px;background:var(--blanc);border:1px solid var(--creme2);border-radius:8px;padding:9px;font-family:inherit;font-size:.8rem;color:var(--brun);resize:none;outline:none" placeholder="Ta réponse…"></textarea>
+          <button onclick="saveReps()" style="width:100%;margin-top:6px;padding:8px;background:var(--rouge);color:#fff;border:none;border-radius:8px;font-family:sans-serif;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">💾 Sauvegarder</button>
+          <div id="saved-ok" style="display:none;text-align:center;font-size:.56rem;color:var(--vert);margin-top:4px">✓ Sauvegardé !</div>
+        </div>
+        <div style="background:var(--creme);border:1px solid var(--creme2);border-radius:12px;padding:14px">
+          <div id="rl2" style="font-size:.48rem;letter-spacing:.2em;text-transform:uppercase;color:var(--or);margin-bottom:7px;font-family:sans-serif;font-weight:600">✦ Réponse de Cléopâtre</div>
+          <textarea id="rep2" style="width:100%;min-height:85px;background:var(--blanc);border:1px solid var(--creme2);border-radius:8px;padding:9px;font-family:inherit;font-size:.8rem;color:var(--brun);resize:none;outline:none" placeholder="Sa réponse…"></textarea>
+        </div>
+      </div>
+      <div style="font-size:.5rem;letter-spacing:.25em;text-transform:uppercase;color:var(--or);margin-bottom:10px;font-family:sans-serif;display:flex;align-items:center;gap:8px">Historique<span style="flex:1;height:1px;background:var(--creme2)"></span></div>
+      <div id="q-hist" style="display:flex;flex-direction:column;gap:9px;max-height:320px;overflow-y:auto"></div>
+    </div>
+
+    <!-- VERITE OU DEFI -->
+    <div id="jeux-vod" class="sub-screen container">
+      <button class="jeu-back" onclick="hideSub('jeux')">← Retour</button>
+      <div id="vod-cats" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px"></div>
+      <div id="vod-card" style="background:linear-gradient(135deg,var(--bleu),#2a5d9e);border-radius:var(--radius);padding:28px 24px;text-align:center;margin-bottom:16px;transition:all .25s">
+        <div id="vod-type" style="font-size:.5rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:10px;font-family:sans-serif">💙 Vérité</div>
+        <p id="vod-text" style="font-size:clamp(.9rem,3vw,1.1rem);color:#fff;line-height:1.65;font-style:italic">Quelle est la chose la plus courageuse que tu aies jamais faite pour l'amour ?</p>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-bottom:20px;flex-wrap:wrap">
+        <button onclick="newVod('verite')" style="padding:11px 22px;background:var(--bleu);color:#fff;border:none;border-radius:30px;cursor:pointer;font-family:inherit;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;transition:all .3s">💙 Vérité</button>
+        <button onclick="newVod('defi')" style="padding:11px 22px;background:#7a4f1f;color:#fff;border:none;border-radius:30px;cursor:pointer;font-family:inherit;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;transition:all .3s">🔥 Défi</button>
+        <button class="btn-s" onclick="newVod('random')">🎲 Surprise</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="background:var(--creme);border:1px solid var(--creme2);border-radius:12px;padding:14px">
+          <div id="vl1" style="font-size:.48rem;letter-spacing:.2em;text-transform:uppercase;color:var(--or);margin-bottom:7px;font-family:sans-serif">✦ Mignon</div>
+          <textarea id="vr1" style="width:100%;min-height:80px;background:var(--blanc);border:1px solid var(--creme2);border-radius:8px;padding:9px;font-family:inherit;font-size:.8rem;color:var(--brun);resize:none;outline:none" placeholder="Ta réponse…"></textarea>
+        </div>
+        <div style="background:var(--creme);border:1px solid var(--creme2);border-radius:12px;padding:14px">
+          <div id="vl2" style="font-size:.48rem;letter-spacing:.2em;text-transform:uppercase;color:var(--or);margin-bottom:7px;font-family:sans-serif">✦ Cléopâtre</div>
+          <textarea id="vr2" style="width:100%;min-height:80px;background:var(--blanc);border:1px solid var(--creme2);border-radius:8px;padding:9px;font-family:inherit;font-size:.8rem;color:var(--brun);resize:none;outline:none" placeholder="Sa réponse…"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEVINE HUMEUR -->
+    <div id="jeux-humeur" class="sub-screen container">
+      <button class="jeu-back" onclick="hideSub('jeux')">← Retour</button>
+      <div class="card" style="margin-bottom:14px">
+        <div style="font-size:.5rem;letter-spacing:.24em;text-transform:uppercase;color:var(--or);margin-bottom:12px;font-family:sans-serif">Comment <span id="h-target">Cléopâtre</span> se sent-elle ?</div>
+        <div id="h-opts" style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px"></div>
+        <div id="h-hint" style="font-size:.68rem;color:var(--or);font-style:italic;margin-bottom:8px"></div>
+        <div id="h-result" style="display:none;padding:12px;border-radius:8px;font-size:.82rem;text-align:center"></div>
+        <div style="font-size:.62rem;color:var(--gris);font-family:sans-serif">Tentatives : <span id="h-tries">3</span></div>
+      </div>
+      <div style="text-align:center;margin-bottom:16px"><button class="btn-p" onclick="newHumeur()">Nouvelle humeur</button></div>
+      <div class="card">
+        <div style="font-size:.5rem;letter-spacing:.22em;text-transform:uppercase;color:var(--or);margin-bottom:10px;font-family:sans-serif">Définir mon humeur</div>
+        <div id="h-set" style="display:flex;flex-wrap:wrap;gap:7px"></div>
+        <p style="font-size:.58rem;color:var(--gris);font-family:sans-serif;margin-top:8px;font-style:italic">L'autre devra deviner 🎯</p>
+      </div>
+    </div>
+
+    <!-- JE T'AURAIS DIT -->
+    <div id="jeux-jtd" class="sub-screen container">
+      <button class="jeu-back" onclick="hideSub('jeux')">← Retour</button>
+      <div style="background:linear-gradient(135deg,#2e1a3a,#4a1a4a);border-radius:var(--radius);padding:26px 22px;text-align:center;margin-bottom:16px">
+        <p id="jtd-phrase" style="font-size:clamp(.95rem,3vw,1.15rem);color:#fff;line-height:1.7;font-style:italic">Si j'étais une saison, je serais <span style="color:var(--or2);font-weight:700">_____</span> parce que…</p>
+      </div>
+      <div style="background:var(--creme);border:1px solid var(--creme2);border-radius:12px;padding:14px;margin-bottom:14px">
+        <div id="jl1" style="font-size:.48rem;letter-spacing:.2em;text-transform:uppercase;color:var(--or);margin-bottom:6px;font-family:sans-serif">✦ Mignon</div>
+        <input id="jr1" style="width:100%;background:var(--blanc);border:1px solid var(--creme2);border-radius:8px;padding:10px 12px;font-family:inherit;font-size:.82rem;color:var(--brun);outline:none;margin-bottom:10px" placeholder="Ta réponse…"/>
+        <div id="jl2" style="font-size:.48rem;letter-spacing:.2em;text-transform:uppercase;color:var(--or);margin-bottom:6px;font-family:sans-serif">✦ Cléopâtre</div>
+        <input id="jr2" style="width:100%;background:var(--blanc);border:1px solid var(--creme2);border-radius:8px;padding:10px 12px;font-family:inherit;font-size:.82rem;color:var(--brun);outline:none" placeholder="Sa réponse…"/>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-bottom:16px;flex-wrap:wrap">
+        <button class="btn-p" onclick="newJtd()">✦ Nouvelle phrase</button>
+        <button class="btn-s" onclick="saveJtd()">💾 Sauvegarder</button>
+      </div>
+      <div style="font-size:.5rem;letter-spacing:.25em;text-transform:uppercase;color:var(--or);margin-bottom:10px;font-family:sans-serif;display:flex;align-items:center;gap:8px">Historique<span style="flex:1;height:1px;background:var(--creme2)"></span></div>
+      <div id="jtd-hist" style="display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto"></div>
+    </div>
+
+    <!-- RADAR -->
+    <div id="jeux-radar" class="sub-screen container">
+      <button class="jeu-back" onclick="hideSub('jeux')">← Retour</button>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
+        <button onclick="fireR(this,'think')" style="background:var(--creme);border:1px solid var(--creme2);border-radius:12px;padding:14px 8px;text-align:center;cursor:pointer;transition:all .3s;font-family:inherit" onmouseover="this.style.background='var(--rouge)';this.style.color='#fff'" onmouseout="this.style.background='var(--creme)';this.style.color=''"><div style="font-size:1.5rem;margin-bottom:5px">💭</div><div style="font-size:.45rem;letter-spacing:.1em;text-transform:uppercase;font-family:sans-serif">J'ai pensé à toi</div></button>
+        <button onclick="fireR(this,'call')" style="background:var(--creme);border:1px solid var(--creme2);border-radius:12px;padding:14px 8px;text-align:center;cursor:pointer;transition:all .3s;font-family:inherit" onmouseover="this.style.background='var(--rouge)';this.style.color='#fff'" onmouseout="this.style.background='var(--creme)';this.style.color=''"><div style="font-size:1.5rem;margin-bottom:5px">📞</div><div style="font-size:.45rem;letter-spacing:.1em;text-transform:uppercase;font-family:sans-serif">Envie d'appel</div></button>
+        <button onclick="fireR(this,'photo')" style="background:var(--creme);border:1px solid var(--creme2);border-radius:12px;padding:14px 8px;text-align:center;cursor:pointer;transition:all .3s;font-family:inherit" onmouseover="this.style.background='var(--rouge)';this.style.color='#fff'" onmouseout="this.style.background='var(--creme)';this.style.color=''"><div style="font-size:1.5rem;margin-bottom:5px">📸</div><div style="font-size:.45rem;letter-spacing:.1em;text-transform:uppercase;font-family:sans-serif">Envoie une photo</div></button>
+        <button onclick="fireR(this,'miss')" style="background:var(--creme);border:1px solid var(--creme2);border-radius:12px;padding:14px 8px;text-align:center;cursor:pointer;transition:all .3s;font-family:inherit" onmouseover="this.style.background='var(--rouge)';this.style.color='#fff'" onmouseout="this.style.background='var(--creme)';this.style.color=''"><div style="font-size:1.5rem;margin-bottom:5px">🥺</div><div style="font-size:.45rem;letter-spacing:.1em;text-transform:uppercase;font-family:sans-serif">Tu me manques</div></button>
+        <button onclick="fireR(this,'love')" style="background:var(--creme);border:1px solid var(--creme2);border-radius:12px;padding:14px 8px;text-align:center;cursor:pointer;transition:all .3s;font-family:inherit" onmouseover="this.style.background='var(--rouge)';this.style.color='#fff'" onmouseout="this.style.background='var(--creme)';this.style.color=''"><div style="font-size:1.5rem;margin-bottom:5px">❤️</div><div style="font-size:.45rem;letter-spacing:.1em;text-transform:uppercase;font-family:sans-serif">Je t'aime</div></button>
+        <button onclick="fireR(this,'night')" style="background:var(--creme);border:1px solid var(--creme2);border-radius:12px;padding:14px 8px;text-align:center;cursor:pointer;transition:all .3s;font-family:inherit" onmouseover="this.style.background='var(--rouge)';this.style.color='#fff'" onmouseout="this.style.background='var(--creme)';this.style.color=''"><div style="font-size:1.5rem;margin-bottom:5px">🌙</div><div style="font-size:.45rem;letter-spacing:.1em;text-transform:uppercase;font-family:sans-serif">Bonne nuit</div></button>
+        <button onclick="fireR(this,'dream')" style="background:var(--creme);border:1px solid var(--creme2);border-radius:12px;padding:14px 8px;text-align:center;cursor:pointer;transition:all .3s;font-family:inherit" onmouseover="this.style.background='var(--rouge)';this.style.color='#fff'" onmouseout="this.style.background='var(--creme)';this.style.color=''"><div style="font-size:1.5rem;margin-bottom:5px">✨</div><div style="font-size:.45rem;letter-spacing:.1em;text-transform:uppercase;font-family:sans-serif">J'ai rêvé de toi</div></button>
+        <button onclick="fireR(this,'hug')" style="background:var(--creme);border:1px solid var(--creme2);border-radius:12px;padding:14px 8px;text-align:center;cursor:pointer;transition:all .3s;font-family:inherit" onmouseover="this.style.background='var(--rouge)';this.style.color='#fff'" onmouseout="this.style.background='var(--creme)';this.style.color=''"><div style="font-size:1.5rem;margin-bottom:5px">🤗</div><div style="font-size:.45rem;letter-spacing:.1em;text-transform:uppercase;font-family:sans-serif">Besoin d'un câlin</div></button>
+        <button onclick="fireR(this,'music')" style="background:var(--creme);border:1px solid var(--creme2);border-radius:12px;padding:14px 8px;text-align:center;cursor:pointer;transition:all .3s;font-family:inherit" onmouseover="this.style.background='var(--rouge)';this.style.color='#fff'" onmouseout="this.style.background='var(--creme)';this.style.color=''"><div style="font-size:1.5rem;margin-bottom:5px">🎵</div><div style="font-size:.45rem;letter-spacing:.1em;text-transform:uppercase;font-family:sans-serif">Cette chanson = toi</div></button>
+      </div>
+      <div id="radar-msg" style="background:var(--creme);border:1px solid var(--creme2);border-radius:var(--radius);padding:18px;text-align:center;min-height:65px;display:flex;align-items:center;justify-content:center"><p style="font-size:.82rem;color:var(--gris);font-style:italic">Appuie sur un signal…</p></div>
+    </div>
+  </div>
+
+  <!-- PAGE PUZZLE -->
+  <div id="page-puzzle" class="page" style="background:var(--blanc)">
+    <div class="container">
+      <div class="s-header"><p class="s-eye">Assemblez ensemble</p><h2 class="s-title">Puzzle</h2></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
+        <button class="plvl active" onclick="setLvl(this,3)"><span style="font-size:1.1rem;font-weight:700;display:block">3×3</span><span style="font-size:.45rem;letter-spacing:.1em;text-transform:uppercase;color:inherit;font-family:sans-serif">Facile</span></button>
+        <button class="plvl" onclick="setLvl(this,4)"><span style="font-size:1.1rem;font-weight:700;display:block">4×4</span><span style="font-size:.45rem;letter-spacing:.1em;text-transform:uppercase;font-family:sans-serif">Moyen</span></button>
+        <button class="plvl" onclick="setLvl(this,5)"><span style="font-size:1.1rem;font-weight:700;display:block">5×5</span><span style="font-size:.45rem;letter-spacing:.1em;text-transform:uppercase;font-family:sans-serif">Difficile</span></button>
+        <button class="plvl" onclick="setLvl(this,6)"><span style="font-size:1.1rem;font-weight:700;display:block">6×6</span><span style="font-size:.45rem;letter-spacing:.1em;text-transform:uppercase;font-family:sans-serif">Expert</span></button>
+        <button class="plvl" onclick="setLvl(this,8)"><span style="font-size:1.1rem;font-weight:700;display:block">8×8</span><span style="font-size:.45rem;letter-spacing:.1em;text-transform:uppercase;font-family:sans-serif">Maître</span></button>
+        <button class="plvl" onclick="setLvl(this,10)"><span style="font-size:1.1rem;font-weight:700;display:block">10×10</span><span style="font-size:.45rem;letter-spacing:.1em;text-transform:uppercase;font-family:sans-serif">Légendaire</span></button>
+      </div>
+      <div id="puz-themes" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px"></div>
+      <div style="display:flex;justify-content:space-between;background:var(--creme);border-radius:10px;padding:10px 14px;margin-bottom:12px">
+        <div style="text-align:center"><div id="p-mv" style="font-size:1rem;font-weight:700;color:var(--rouge);font-family:sans-serif">0</div><div style="font-size:.42rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gris);font-family:sans-serif">Mouvements</div></div>
+        <div style="text-align:center"><div id="p-tm" style="font-size:1rem;font-weight:700;color:var(--rouge);font-family:sans-serif">0:00</div><div style="font-size:.42rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gris);font-family:sans-serif">Temps</div></div>
+        <div style="text-align:center"><div id="p-bst" style="font-size:1rem;font-weight:700;color:var(--rouge);font-family:sans-serif">—</div><div style="font-size:.42rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gris);font-family:sans-serif">Record</div></div>
+      </div>
+      <div id="p-win" style="display:none;text-align:center;padding:18px;background:rgba(45,122,79,.08);border:1px solid rgba(45,122,79,.2);border-radius:var(--radius);margin-bottom:12px">
+        <div style="font-size:1.1rem;color:var(--vert);font-style:italic;margin-bottom:6px">🎉 Puzzle complété !</div>
+        <div id="p-win-msg" style="font-size:.72rem;color:var(--gris);font-family:sans-serif"></div>
+      </div>
+      <div id="p-board" style="display:grid;gap:3px;margin:0 auto 14px;width:fit-content"></div>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <button class="btn-p" onclick="initPuz()">🔀 Nouveau puzzle</button>
+        <button class="btn-s" onclick="hintPuz()">💡 Indice</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE NIVEAU -->
+  <div id="page-niveau" class="page" style="background:linear-gradient(160deg,#1a0a0f,var(--brun));min-height:100vh">
+    <div class="container">
+      <div style="text-align:center;padding:20px 0 16px">
+        <div id="nv-badge" style="width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,var(--or),var(--rouge));display:flex;align-items:center;justify-content:center;font-size:2.2rem;margin:0 auto 12px;box-shadow:0 0 36px rgba(201,150,106,.3)">💕</div>
+        <div id="nv-name" style="font-size:1.4rem;font-style:italic;color:var(--or)">Étincelle</div>
+        <div id="nv-num" style="font-size:.52rem;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-top:3px;font-family:sans-serif">Niveau 1</div>
+      </div>
+      <div style="margin-bottom:16px">
+        <div style="height:7px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden;margin-bottom:5px"><div id="xp-bar" style="height:100%;background:linear-gradient(90deg,var(--rouge),var(--or));border-radius:4px;width:0%;transition:width 1s ease"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:.46rem;color:rgba(255,255,255,.3);font-family:sans-serif"><span id="xp-cur">0 XP</span><span id="xp-nxt">100 XP</span></div>
+      </div>
+      <div id="nv-list" style="display:flex;flex-direction:column;gap:7px;margin-bottom:20px"></div>
+      <div style="font-size:.5rem;letter-spacing:.28em;text-transform:uppercase;color:var(--or);margin-bottom:12px;font-family:sans-serif">🏅 Badges</div>
+      <div id="bdg-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"></div>
+    </div>
+  </div>
+
+  <!-- PAGE RITUELS -->
+  <div id="page-rituels" class="page" style="background:var(--creme2)">
+    <div id="rituels-menu" class="container">
+      <div class="s-header"><p class="s-eye">Chaque semaine</p><h2 class="s-title">Nos rituels</h2></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div onclick="showSub('rituels','mot')" style="background:var(--blanc);border:1px solid var(--creme2);border-radius:var(--radius);padding:18px;cursor:pointer;text-align:center;transition:all .3s" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='var(--or)'" onmouseout="this.style.transform='none';this.style.borderColor='var(--creme2)'"><div style="font-size:2rem;margin-bottom:8px">📝</div><div style="font-style:italic;color:var(--rouge);font-size:.92rem;margin-bottom:5px">Mot de la semaine</div><div style="font-size:.58rem;color:var(--gris);line-height:1.6;font-family:sans-serif">Un mot pour résumer votre semaine</div><div style="display:inline-block;margin-top:7px;padding:3px 10px;background:rgba(201,150,106,.1);border-radius:20px;font-size:.42rem;letter-spacing:.14em;text-transform:uppercase;color:var(--or);font-family:sans-serif">Hebdomadaire</div></div>
+        <div onclick="showSub('rituels','photo')" style="background:var(--blanc);border:1px solid var(--creme2);border-radius:var(--radius);padding:18px;cursor:pointer;text-align:center;transition:all .3s" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='var(--or)'" onmouseout="this.style.transform='none';this.style.borderColor='var(--creme2)'"><div style="font-size:2rem;margin-bottom:8px">📷</div><div style="font-style:italic;color:var(--rouge);font-size:.92rem;margin-bottom:5px">Photo de la semaine</div><div style="font-size:.58rem;color:var(--gris);line-height:1.6;font-family:sans-serif">La plus honnête, pas la plus belle</div><div style="display:inline-block;margin-top:7px;padding:3px 10px;background:rgba(201,150,106,.1);border-radius:20px;font-size:.42rem;letter-spacing:.14em;text-transform:uppercase;color:var(--or);font-family:sans-serif">Hebdomadaire</div></div>
+        <div onclick="showSub('rituels','mememo')" style="background:var(--blanc);border:1px solid var(--creme2);border-radius:var(--radius);padding:18px;cursor:pointer;text-align:center;transition:all .3s" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='var(--or)'" onmouseout="this.style.transform='none';this.style.borderColor='var(--creme2)'"><div style="font-size:2rem;margin-bottom:8px">🌍</div><div style="font-style:italic;color:var(--rouge);font-size:.92rem;margin-bottom:5px">Même moment</div><div style="font-size:.58rem;color:var(--gris);line-height:1.6;font-family:sans-serif">La même chose au même instant</div><div style="display:inline-block;margin-top:7px;padding:3px 10px;background:rgba(201,150,106,.1);border-radius:20px;font-size:.42rem;letter-spacing:.14em;text-transform:uppercase;color:var(--or);font-family:sans-serif">Libre</div></div>
+      </div>
+    </div>
+    <div id="rituels-mot" class="sub-screen container">
+      <button class="jeu-back" onclick="hideSub('rituels')">← Retour</button>
+      <div class="card" style="margin-bottom:14px">
+        <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:10px"><label style="font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:var(--or);font-family:sans-serif" id="ml1">Mot de Mignon</label><input id="mot1" style="background:var(--creme);border:1px solid var(--creme2);border-radius:8px;padding:10px 12px;font-family:inherit;font-size:1rem;color:var(--brun);outline:none" placeholder="Un seul mot…" maxlength="20"/></div>
+        <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:12px"><label style="font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:var(--or);font-family:sans-serif" id="ml2">Mot de Cléopâtre</label><input id="mot2" style="background:var(--creme);border:1px solid var(--creme2);border-radius:8px;padding:10px 12px;font-family:inherit;font-size:1rem;color:var(--brun);outline:none" placeholder="Un seul mot…" maxlength="20"/></div>
+        <button class="btn-p" onclick="saveMot()">Ajouter à l'archive</button>
+      </div>
+      <div style="font-size:.5rem;letter-spacing:.25em;text-transform:uppercase;color:var(--or);margin-bottom:10px;font-family:sans-serif;display:flex;align-items:center;gap:8px">Archive<span style="flex:1;height:1px;background:var(--creme2)"></span></div>
+      <div id="mot-arch" style="display:flex;flex-direction:column;gap:9px"></div>
+    </div>
+    <div id="rituels-photo" class="sub-screen container">
+      <button class="jeu-back" onclick="hideSub('rituels')">← Retour</button>
+      <div onclick="document.getElementById('ph-file').click()" style="background:var(--blanc);border:2px dashed var(--creme2);border-radius:var(--radius);padding:24px;text-align:center;margin-bottom:12px;cursor:pointer;transition:all .3s" onmouseover="this.style.borderColor='var(--or)'" onmouseout="this.style.borderColor='var(--creme2)'">
+        <div style="font-size:2.2rem;margin-bottom:8px">📷</div>
+        <div style="font-size:.68rem;color:var(--gris);font-family:sans-serif">Appuie pour ta photo de la semaine</div>
+        <img id="ph-prev" style="display:none;width:100%;border-radius:10px;margin-top:10px"/>
+      </div>
+      <input type="file" id="ph-file" accept="image/*" style="display:none" onchange="loadPhSem(this)"/>
+      <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:10px"><label style="font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:var(--or);font-family:sans-serif">Un mot sur cette semaine</label><input id="ph-comment" style="background:var(--blanc);border:1px solid var(--creme2);border-radius:8px;padding:10px 12px;font-family:inherit;font-size:.82rem;color:var(--brun);outline:none" placeholder="Ce que cette photo représente…"/></div>
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+        <select id="ph-who" style="padding:9px 12px;background:var(--blanc);border:1px solid var(--creme2);border-radius:10px;font-family:inherit;font-size:.72rem;color:var(--brun);outline:none"><option id="pho1">Mignon</option><option id="pho2">Cléopâtre</option></select>
+        <button class="btn-p" onclick="savePhSem()">Ajouter</button>
+      </div>
+      <div style="font-size:.5rem;letter-spacing:.25em;text-transform:uppercase;color:var(--or);margin-bottom:10px;font-family:sans-serif;display:flex;align-items:center;gap:8px">Notre album<span style="flex:1;height:1px;background:var(--creme2)"></span></div>
+      <div id="ph-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
+    </div>
+    <div id="rituels-mememo" class="sub-screen container">
+      <button class="jeu-back" onclick="hideSub('rituels')">← Retour</button>
+      <p style="font-size:.68rem;color:var(--gris);font-family:sans-serif;margin-bottom:14px;font-style:italic;line-height:1.7">Synchronisez-vous d'abord par message, puis faites-le exactement en même temps !</p>
+      <div id="mm-list" style="display:flex;flex-direction:column;gap:9px"></div>
+    </div>
+  </div>
+
+  <!-- PAGE MEMOIRE -->
+  <div id="page-memoire" class="page" style="background:var(--creme)">
+    <div id="memoire-menu" class="container">
+      <div class="s-header"><p class="s-eye">Nos trésors</p><h2 class="s-title">Mémoire</h2></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div onclick="showSub('memoire','mur')" style="background:var(--blanc);border:1px solid var(--creme2);border-radius:var(--radius);padding:18px;cursor:pointer;text-align:center;transition:all .3s" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='var(--or)'" onmouseout="this.style.transform='none';this.style.borderColor='var(--creme2)'"><div style="font-size:1.8rem;margin-bottom:7px">📌</div><div style="font-style:italic;color:var(--rouge);font-size:.9rem;margin-bottom:4px">Mur de souvenirs</div><div style="font-size:.56rem;color:var(--gris);line-height:1.6;font-family:sans-serif">Vos mots, pensées et souvenirs</div></div>
+        <div onclick="showSub('memoire','lettre')" style="background:var(--blanc);border:1px solid var(--creme2);border-radius:var(--radius);padding:18px;cursor:pointer;text-align:center;transition:all .3s" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='var(--or)'" onmouseout="this.style.transform='none';this.style.borderColor='var(--creme2)'"><div style="font-size:1.8rem;margin-bottom:7px">💌</div><div style="font-style:italic;color:var(--rouge);font-size:.9rem;margin-bottom:4px">Lettres du futur</div><div style="font-size:.56rem;color:var(--gris);line-height:1.6;font-family:sans-serif">Écrivez aujourd'hui, lisez plus tard</div></div>
+        <div onclick="showSub('memoire','bucket')" style="background:var(--blanc);border:1px solid var(--creme2);border-radius:var(--radius);padding:18px;cursor:pointer;text-align:center;transition:all .3s" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='var(--or)'" onmouseout="this.style.transform='none';this.style.borderColor='var(--creme2)'"><div style="font-size:1.8rem;margin-bottom:7px">✈️</div><div style="font-style:italic;color:var(--rouge);font-size:.9rem;margin-bottom:4px">Bucket list</div><div style="font-size:.56rem;color:var(--gris);line-height:1.6;font-family:sans-serif">Tout ce qu'on fera ensemble</div></div>
+        <div onclick="showSub('memoire','dict')" style="background:var(--blanc);border:1px solid var(--creme2);border-radius:var(--radius);padding:18px;cursor:pointer;text-align:center;transition:all .3s" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='var(--or)'" onmouseout="this.style.transform='none';this.style.borderColor='var(--creme2)'"><div style="font-size:1.8rem;margin-bottom:7px">📖</div><div style="font-style:italic;color:var(--rouge);font-size:.9rem;margin-bottom:4px">Notre dictionnaire</div><div style="font-size:.56rem;color:var(--gris);line-height:1.6;font-family:sans-serif">Vos mots inventés à vous</div></div>
+      </div>
+    </div>
+    <div id="memoire-mur" class="sub-screen">
+      <button class="jeu-back" onclick="hideSub('memoire')" style="margin-left:18px">← Retour</button>
+      <div style="padding:0 18px 14px"><div class="card"><label style="font-size:.5rem;letter-spacing:.24em;text-transform:uppercase;color:var(--or);margin-bottom:8px;display:block;font-family:sans-serif">Ajouter un souvenir</label><textarea id="note-in" style="width:100%;background:var(--creme);border:1px solid var(--creme2);border-radius:8px;padding:10px;font-family:inherit;font-size:.85rem;color:var(--brun);resize:none;min-height:68px;outline:none;margin-bottom:10px" placeholder="Un mot doux, un souvenir…"></textarea><div style="display:flex;gap:8px;align-items:center"><select id="note-who" style="flex:1;padding:8px 12px;background:var(--creme);border:1px solid var(--creme2);border-radius:20px;font-family:inherit;font-size:.72rem;color:var(--brun);outline:none"><option id="nwo1">Mignon</option><option id="nwo2">Cléopâtre</option></select><button class="btn-p" onclick="addNote()">Ajouter ✦</button></div></div></div>
+      <div id="notes-wall" style="columns:2;column-gap:10px;padding:0 18px"></div>
+    </div>
+    <div id="memoire-lettre" class="sub-screen container">
+      <button class="jeu-back" onclick="hideSub('memoire')">← Retour</button>
+      <div class="card" style="margin-bottom:14px">
+        <div style="font-size:.5rem;letter-spacing:.22em;text-transform:uppercase;color:var(--or);margin-bottom:9px;font-family:sans-serif">Écrire une lettre du futur</div>
+        <textarea id="ltr-text" style="width:100%;min-height:120px;background:var(--creme);border:1px solid var(--creme2);border-radius:8px;padding:10px;font-family:inherit;font-size:.85rem;color:var(--brun);resize:none;outline:none;margin-bottom:10px" placeholder="Cher(e) nous, dans quelques mois…"></textarea>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <select id="ltr-who" style="padding:8px 12px;background:var(--creme);border:1px solid var(--creme2);border-radius:10px;font-family:inherit;font-size:.72rem;color:var(--brun);outline:none"><option id="lwo1">Mignon</option><option id="lwo2">Cléopâtre</option></select>
+          <input type="date" id="ltr-date" style="padding:8px 12px;background:var(--creme);border:1px solid var(--creme2);border-radius:10px;font-family:inherit;font-size:.72rem;color:var(--brun);outline:none"/>
+          <button class="btn-p" onclick="saveLtr()">Sceller ✦</button>
+        </div>
+      </div>
+      <div id="ltr-list" style="display:flex;flex-direction:column;gap:9px"></div>
+    </div>
+    <div id="memoire-bucket" class="sub-screen container">
+      <button class="jeu-back" onclick="hideSub('memoire')">← Retour</button>
+      <div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:.5rem;color:var(--gris);font-family:sans-serif;margin-bottom:5px"><span>Progression</span><span id="bk-count">0 / 0</span></div><div style="height:5px;background:var(--creme2);border-radius:3px;overflow:hidden"><div id="bk-bar" style="height:100%;background:linear-gradient(90deg,var(--vert),var(--or));border-radius:3px;width:0%;transition:width .6s"></div></div></div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px">
+        <input id="bk-in" style="flex:1;min-width:130px;background:var(--blanc);border:1px solid var(--creme2);border-radius:10px;padding:9px 12px;font-family:inherit;font-size:.8rem;color:var(--brun);outline:none" placeholder="Un rêve à réaliser…"/>
+        <select id="bk-cat" style="padding:8px 10px;background:var(--blanc);border:1px solid var(--creme2);border-radius:10px;font-family:inherit;font-size:.7rem;color:var(--brun);outline:none"><option>✈️ Voyage</option><option>🎭 Expérience</option><option>🍽️ Gastronomie</option><option>🎵 Musique</option><option>💕 Romantique</option><option>🌟 Rêve fou</option></select>
+        <button class="btn-p" onclick="addBk()">+</button>
+      </div>
+      <div id="bk-list" style="display:flex;flex-direction:column;gap:7px"></div>
+    </div>
+    <div id="memoire-dict" class="sub-screen container">
+      <button class="jeu-back" onclick="hideSub('memoire')">← Retour</button>
+      <div class="card" style="margin-bottom:14px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px">
+          <div style="display:flex;flex-direction:column;gap:4px"><label style="font-size:.48rem;letter-spacing:.18em;text-transform:uppercase;color:var(--or);font-family:sans-serif">Le mot inventé</label><input id="dc-mot" style="background:var(--creme);border:1px solid var(--creme2);border-radius:8px;padding:9px 11px;font-family:inherit;font-size:.82rem;color:var(--brun);outline:none" placeholder="Ex: flourner"/></div>
+          <div style="display:flex;flex-direction:column;gap:4px"><label style="font-size:.48rem;letter-spacing:.18em;text-transform:uppercase;color:var(--or);font-family:sans-serif">Définition</label><input id="dc-def" style="background:var(--creme);border:1px solid var(--creme2);border-radius:8px;padding:9px 11px;font-family:inherit;font-size:.82rem;color:var(--brun);outline:none" placeholder="Ce que ça veut dire"/></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:10px"><label style="font-size:.48rem;letter-spacing:.18em;text-transform:uppercase;color:var(--or);font-family:sans-serif">Histoire / contexte</label><textarea id="dc-ctx" style="background:var(--creme);border:1px solid var(--creme2);border-radius:8px;padding:9px 11px;font-family:inherit;font-size:.8rem;color:var(--brun);resize:none;min-height:50px;outline:none" placeholder="Comment ce mot est né…"></textarea></div>
+        <button class="btn-p" onclick="addDict()">Ajouter au dictionnaire</button>
+      </div>
+      <div id="dc-list" style="display:flex;flex-direction:column;gap:9px"></div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <button class="bnav-btn active" onclick="navTo('home',this)"><span class="bi">🏠</span><span class="bl">Accueil</span></button>
+    <button class="bnav-btn" onclick="navTo('jeux',this)"><span class="bi">🎮</span><span class="bl">Jeux</span></button>
+    <button class="bnav-btn" onclick="navTo('puzzle',this)"><span class="bi">🧩</span><span class="bl">Puzzle</span></button>
+    <button class="bnav-btn" onclick="navTo('niveau',this)"><span class="bi">🏆</span><span class="bl">Niveau</span></button>
+    <button class="bnav-btn" onclick="navTo('rituels',this)"><span class="bi">📅</span><span class="bl">Rituels</span></button>
+    <button class="bnav-btn" onclick="navTo('memoire',this)"><span class="bi">💌</span><span class="bl">Mémoire</span></button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<style>
+  .meteo-btn{padding:7px 11px;background:var(--creme);border:1px solid var(--creme2);border-radius:20px;cursor:pointer;font-size:.85rem;transition:all .3s;font-family:inherit}
+  .meteo-btn.on,.meteo-btn:hover{background:var(--rouge);color:#fff;border-color:var(--rouge)}
+  .plvl{background:var(--creme);border:1px solid var(--creme2);border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .3s;font-family:inherit;color:var(--brun)}
+  .plvl.active,.plvl:hover{background:var(--rouge);color:#fff;border-color:var(--rouge)}
+</style>
+<script>
+// ===== VARIABLES GLOBALES =====
+let N1='Mignon',N2='Cléopâtre';
+const ls=localStorage;
+const get=k=>ls.getItem(k);
+const set=(k,v)=>ls.setItem(k,typeof v==='string'?v:JSON.stringify(v));
+const getJ=k=>{try{return JSON.parse(get(k)||'null')}catch{return null}};
+
+// ===== AUTH =====
+function switchAuth(t,btn){
+  document.querySelectorAll('.auth-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('auth-signup').style.display=t==='signup'?'flex':'none';
+  document.getElementById('auth-login').style.display=t==='login'?'flex':'none';
+}
+function doSignup(){
+  const n1=document.getElementById('s-n1').value.trim()||'Mignon';
+  const n2=document.getElementById('s-n2').value.trim()||'Cléopâtre';
+  const email=document.getElementById('s-email').value.trim();
+  const pwd=document.getElementById('s-pwd').value;
+  const reunion=document.getElementById('s-reunion').value;
+  if(!email||!pwd){toast('Merci de remplir email et mot de passe');return}
+  set('us_user',{n1,n2,email,pwd});
+  if(reunion){set('us_reunion',reunion);document.getElementById('reunion-date').value=reunion;updateCD()}
+  launch(n1,n2);
+}
+function doLogin(){
+  const email=document.getElementById('l-email').value.trim();
+  const pwd=document.getElementById('l-pwd').value;
+  const u=getJ('us_user');
+  if(!u){toast('Aucun compte trouvé');return}
+  if(u.email!==email||u.pwd!==pwd){toast('Email ou mot de passe incorrect');return}
+  launch(u.n1,u.n2);
+}
+function launch(n1,n2){
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  N1=n1;N2=n2;
+  setNames();
+  const r=get('us_reunion');
+  if(r){document.getElementById('reunion-date').value=r;updateCD()}
+  restoreAv();updateNiveau();initPuz();buildThemes();
+  renderQHist();renderNotes();renderLtrs();renderBk();renderDc();
+  renderMotArch();renderPhGrid();buildMM();buildNvList();buildBadges();
+  buildVodCats();buildHumeur();renderJtdHist();
+}
+// ===== SUPABASE =====
+const SURL="https://nnbgxtlvpewpmqirwksv.supabase.co";
+const SKEY="sb_publishable_cseCUscRtR9S-qrPhSiC6g_xv2qmvcq";
+let sb=null;
+let COUPLE_ID=null;
+
+function initSB(){
+  if(window.supabase){
+    sb=window.supabase.createClient(SURL,SKEY);
+    return true;
+  }
+  return false;
+}
+
+async function doSignup(){
+  if(!initSB()){toast('Erreur connexion');return}
+  const n1=document.getElementById('s-n1').value.trim()||'Mignon';
+  const n2=document.getElementById('s-n2').value.trim()||'Cléopâtre';
+  const email=document.getElementById('s-email').value.trim();
+  const pwd=document.getElementById('s-pwd').value;
+  const reunion=document.getElementById('s-reunion').value;
+  if(!email||!pwd){toast('Merci de remplir email et mot de passe');return}
+  const {data,error}=await sb.auth.signUp({email,password:pwd});
+  if(error){toast('Erreur : '+error.message);return}
+  COUPLE_ID=data.user.id;
+  set('us_user',{n1,n2,email,pwd});
+  set('us_couple_id',COUPLE_ID);
+  if(reunion){set('us_reunion',reunion);document.getElementById('reunion-date').value=reunion;updateCD()}
+  await sb.from('us_data').upsert({couple_id:COUPLE_ID,key:'profile',value:JSON.stringify({n1,n2,reunion})});
+  launch(n1,n2);
+  subscribeRT();
+  toast('Compte créé avec succès ! ✓');
+}
+
+async function doLogin(){
+  if(!initSB()){toast('Erreur connexion');return}
+  const email=document.getElementById('l-email').value.trim();
+  const pwd=document.getElementById('l-pwd').value;
+  if(!email||!pwd){toast('Merci de remplir email et mot de passe');return}
+  const {data,error}=await sb.auth.signInWithPassword({email,password:pwd});
+  if(error){toast('Email ou mot de passe incorrect');return}
+  COUPLE_ID=data.user.id;
+  set('us_couple_id',COUPLE_ID);
+  const {data:profile}=await sb.from('us_data').select('value').eq('couple_id',COUPLE_ID).eq('key','profile').single();
+  let n1='Mignon',n2='Cléopâtre';
+  if(profile){const p=JSON.parse(profile.value);n1=p.n1||n1;n2=p.n2||n2;if(p.reunion){set('us_reunion',p.reunion)}}
+  set('us_user',{n1,n2,email,pwd});
+  launch(n1,n2);
+  subscribeRT();
+  await syncCloud();
+  toast('Connecté ! ✓');
+}
+
+function subscribeRT(){
+  if(!sb||!COUPLE_ID)return;
+  sb.channel('us-'+COUPLE_ID)
+    .on('postgres_changes',{event:'*',schema:'public',table:'us_data',filter:'couple_id=eq.'+COUPLE_ID},
+      payload=>{
+        if(!payload.new||!payload.new.key)return;
+        const k=payload.new.key,v=payload.new.value;
+        if(k==='profile')return;
+        localStorage.setItem(k,v);
+        if(k==='us_notes')renderNotes();
+        else if(k==='us_hist')renderQHist();
+        else if(k==='us_mots')renderMotArch();
+        else if(k==='us_ltrs')renderLtrs();
+        else if(k==='us_bk')renderBk();
+        else if(k==='us_dict')renderDc();
+        else if(k==='us_jtd')renderJtdHist();
+        else if(k==='us_phsem')renderPhGrid();
+        else if(k==='us_meteo'){const m=JSON.parse(v);document.getElementById('mi1').textContent=m.p1||'—';document.getElementById('mi2').textContent=m.p2||'—'}
+        else if(k==='us_xp'){updateNiveau()}
+        toast('🔄 Synchronisé !');
+      }
+    ).subscribe();
+}
+
+async function cloudSave(key,value){
+  if(!sb||!COUPLE_ID)return;
+  try{await sb.from('us_data').upsert({couple_id:COUPLE_ID,key:key,value:typeof value==='string'?value:JSON.stringify(value),updated_at:new Date().toISOString()})}catch(e){}
+}
+
+async function syncCloud(){
+  if(!sb||!COUPLE_ID)return;
+  const {data}=await sb.from('us_data').select('key,value').eq('couple_id',COUPLE_ID);
+  if(!data)return;
+  data.forEach(row=>{if(row.key!=='profile')localStorage.setItem(row.key,row.value)});
+  renderNotes();renderQHist();renderMotArch();renderLtrs();renderBk();renderDc();renderJtdHist();renderPhGrid();updateNiveau();
+  const r=get('us_reunion');if(r){document.getElementById('reunion-date').value=r;updateCD()}
+}
+
+window.addEventListener('load',async()=>{
+  if(!initSB()){setTimeout(()=>{initSB()},1000);return}
+  const {data}=await sb.auth.getSession();
+  if(data&&data.session){
+    COUPLE_ID=data.session.user.id;
+    set('us_couple_id',COUPLE_ID);
+    const u=getJ('us_user')||{n1:'Mignon',n2:'Cléopâtre'};
+    launch(u.n1,u.n2);
+    subscribeRT();
+    await syncCloud();
+  }
+  setInterval(updateCD,60000);
+  setInterval(tickPuz,1000);
+});
+
+// ===== NOMS =====
+function setNames(){
+  ['hn1','mw1','ml1'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=el.id==='ml1'?'Mot de '+N1:N1});
+  ['hn2','mw2','ml2'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=el.id==='ml2'?'Mot de '+N2:N2});
+  document.getElementById('rl1').textContent='✦ Réponse de '+N1;
+  document.getElementById('rl2').textContent='✦ Réponse de '+N2;
+  document.getElementById('vl1').textContent='✦ '+N1;
+  document.getElementById('vl2').textContent='✦ '+N2;
+  document.getElementById('jl1').textContent='✦ '+N1;
+  document.getElementById('jl2').textContent='✦ '+N2;
+  document.getElementById('h-target').textContent=N2;
+  ['nwo1','pho1','lwo1'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=N1});
+  ['nwo2','pho2','lwo2'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=N2});
+}
+
+// ===== NAVIGATION =====
+function navTo(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(btn)btn.classList.add('active');
+  else{const btns=document.querySelectorAll('.bnav-btn');const pages=['home','jeux','puzzle','niveau','rituels','memoire'];const i=pages.indexOf(id);if(i>=0)btns[i].classList.add('active')}
+}
+function showSub(page,id){
+  const menu=document.getElementById(page+'-menu');
+  if(menu)menu.style.display='none';
+  document.querySelectorAll('#page-'+page+' .sub-screen').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById(page+'-'+id);
+  if(el)el.classList.add('active');
+}
+function hideSub(page){
+  const menu=document.getElementById(page+'-menu');
+  if(menu)menu.style.display='block';
+  document.querySelectorAll('#page-'+page+' .sub-screen').forEach(s=>s.classList.remove('active'));
+}
+
+// ===== AVATAR =====
+function loadAv(input,imgId,emojiId){
+  const file=input.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    const img=document.getElementById(imgId);
+    img.src=e.target.result;img.style.opacity='1';
+    document.getElementById(emojiId).style.opacity='0';
+    try{set('us_'+imgId,e.target.result)}catch(err){}
+  };r.readAsDataURL(file);
+}
+function restoreAv(){
+  ['hi1','hi2'].forEach(id=>{
+    const s=get('us_'+id);
+    if(s){const el=document.getElementById(id);el.src=s;el.style.opacity='1';
+    const eid=id.replace('hi','he');const ee=document.getElementById(eid);if(ee)ee.style.opacity='0';}
+  });
+}
+
+// ===== METEO =====
+function setMeteo(btn,icon){
+  document.querySelectorAll('.meteo-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
+  const m=getJ('us_meteo')||{p1:'—',p2:'—'};m.p1=icon;set('us_meteo',m);cloudSave('us_meteo',m);
+  document.getElementById('mi1').textContent=icon;gainXP(5);toast('Météo mise à jour ✓');
+}
+(()=>{const m=getJ('us_meteo')||{};
+  const i1=document.getElementById('mi1');const i2=document.getElementById('mi2');
+  if(i1)i1.textContent=m.p1||'—';if(i2)i2.textContent=m.p2||'—';
+})();
+
+// ===== COUNTDOWN =====
+function updateCD(){
+  const v=document.getElementById('reunion-date').value;if(!v)return;
+  set('us_reunion',v);
+  const diff=new Date(v)-new Date();
+  if(diff<=0){['cd-j','cd-h','cd-m'].forEach(id=>document.getElementById(id).textContent='🎉');return}
+  document.getElementById('cd-j').textContent=Math.floor(diff/(864e5));
+  document.getElementById('cd-h').textContent=Math.floor(diff%(864e5)/(36e5));
+  document.getElementById('cd-m').textContent=Math.floor(diff%(36e5)/6e4);
+}
+
+// ===== XP & NIVEAU =====
+const NVX=[
+  {name:'Étincelle',icon:'💕',xp:0},{name:'Petite Flamme',icon:'🌱',xp:100},
+  {name:'Complicité',icon:'🤝',xp:250},{name:'Fusion',icon:'💫',xp:500},
+  {name:'Âmes Sœurs',icon:'🌟',xp:800},{name:'Indéfectible',icon:'💎',xp:1200},
+  {name:'Infini',icon:'♾️',xp:1800},{name:'Légende',icon:'👑',xp:2600},
+  {name:'Éternité',icon:'✨',xp:3600},{name:'Flamme Éternelle',icon:'🔥',xp:5000},
+];
+const BDGS=[
+  {n:'Premier mot',i:'📝',c:'mot'},{n:'Première photo',i:'📸',c:'photo'},
+  {n:'10 questions',i:'💬',c:'q10'},{n:'Premier défi',i:'🎭',c:'vod1'},
+  {n:'Puzzle 3x3',i:'🧩',c:'p3'},{n:'Puzzle expert',i:'🏆',c:'p6'},
+  {n:'Lettre scellée',i:'💌',c:'ltr'},{n:'Bucket list',i:'✈️',c:'bkt'},
+  {n:'Dictionnaire',i:'📖',c:'dct'},{n:'100 XP',i:'⭐',c:'xp100'},
+  {n:'500 XP',i:'🌟',c:'xp500'},{n:'Même moment',i:'🌍',c:'mm'},
+  {n:'Radar x5',i:'💭',c:'r5'},{n:'Semaine sauvée',i:'📅',c:'wk1'},
+  {n:'JTD x10',i:'🌸',c:'jtd10'},{n:'Niveau 5',i:'💎',c:'lv5'},
+];
+function getXP(){return parseInt(get('us_xp')||'0')}
+function gainXP(n){
+  const xp=getXP()+n;set('us_xp',xp);cloudSave('us_xp',String(xp));
+  ckBdg('xp100',xp>=100);ckBdg('xp500',xp>=500);updateNiveau();
+}
+function getLvl(xp){let l=0;for(let i=NVX.length-1;i>=0;i--){if(xp>=NVX[i].xp){l=i;break}}return l}
+function updateNiveau(){
+  const xp=getXP(),l=getLvl(xp),n=NVX[l],nx=NVX[l+1]||NVX[l];
+  const pct=l<NVX.length-1?Math.min(100,((xp-n.xp)/(nx.xp-n.xp))*100):100;
+  document.getElementById('nav-lvl').textContent='Niv.'+(l+1);
+  document.getElementById('nav-badge').textContent=n.name;
+  document.getElementById('hlb-name').textContent='✦ '+n.name;
+  document.getElementById('hlb-pts').textContent=xp+' / '+nx.xp+' XP';
+  document.getElementById('hlb-fill').style.width=pct+'%';
+  document.getElementById('nv-badge').textContent=n.icon;
+  document.getElementById('nv-name').textContent=n.name;
+  document.getElementById('nv-num').textContent='Niveau '+(l+1);
+  document.getElementById('xp-bar').style.width=pct+'%';
+  document.getElementById('xp-cur').textContent=xp+' XP';
+  document.getElementById('xp-nxt').textContent=nx.xp+' XP';
+  ckBdg('lv5',l>=4);
+}
+function ckBdg(c,ok){
+  if(!ok)return;
+  const b=getJ('us_bdgs')||[];
+  if(b.includes(c))return;
+  b.push(c);set('us_bdgs',b);
+  const bd=BDGS.find(x=>x.c===c);
+  if(bd)toast('🏅 Badge débloqué : '+bd.n+' !');
+  buildBadges();
+}
+function buildNvList(){
+  const xp=getXP(),l=getLvl(xp);
+  document.getElementById('nv-list').innerHTML=NVX.map((n,i)=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;margin-bottom:6px;background:${i===l?'rgba(201,150,106,.15)':i<l?'rgba(201,150,106,.06)':'rgba(255,255,255,.03)'};border:1px solid ${i===l?'var(--or)':i<l?'rgba(201,150,106,.18)':'rgba(255,255,255,.05)'}">
+      <div style="font-size:1.4rem;width:38px;text-align:center">${n.icon}</div>
+      <div style="flex:1"><div style="font-size:.8rem;color:var(--or2);font-style:italic">${n.name}</div><div style="font-size:.44rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.28);margin-top:2px;font-family:sans-serif">Niveau ${i+1} · ${n.xp} XP</div></div>
+      <div style="font-size:1rem">${i<l?'✓':i===l?'▶':'🔒'}</div>
+    </div>`).join('');
+}
+function buildBadges(){
+  const u=getJ('us_bdgs')||[];
+  document.getElementById('bdg-grid').innerHTML=BDGS.map(b=>`
+    <div style="text-align:center;padding:10px 4px;background:rgba(255,255,255,${u.includes(b.c)?'.06':'.02'});border:1px solid rgba(${u.includes(b.c)?'201,150,106,.22':'255,255,255,.05'});border-radius:9px">
+      <span style="font-size:1.4rem;display:block;margin-bottom:3px;filter:${u.includes(b.c)?'none':'grayscale(1)'};opacity:${u.includes(b.c)?'1':'.35'}">${b.i}</span>
+      <div style="font-size:.38rem;letter-spacing:.1em;text-transform:uppercase;color:${u.includes(b.c)?'var(--or2)':'rgba(255,255,255,.22)'};font-family:sans-serif">${b.n}</div>
+    </div>`).join('');
+}
+
+// ===== QUESTIONS =====
+const TH={
+"Amour 💕":["Si tu pouvais me dire une seule chose ce soir, ce serait quoi ?","Quel est le moment exact où tu as su que tu m'aimais ?","Comment tu décrirais notre amour à quelqu'un qui ne t'a jamais vu amoureux ?","Quelle est la chose la plus belle que tu aies faite pour moi sans que je le sache ?","Si notre amour avait une couleur, ce serait laquelle et pourquoi ?","Qu'est-ce qui te donne le plus confiance en nous deux ?","Quel est ton souvenir préféré de nous depuis le début ?","Si tu pouvais revivre un seul moment avec moi, lequel ?","Comment tu sais que tu m'aimes vraiment ?","Qu'est-ce que tu fais quand tu penses à moi et que je ne suis pas là ?","C'est quoi la chose que je fais qui te touche sans que je m'en rende compte ?","Quelle est la plus belle façon dont je t'ai surpris(e) ?","Comment tu imagines qu'on va vieillir ensemble ?","C'est quoi le premier souvenir de moi qui te vient quand tu fermes les yeux ?","Comment est-ce que je t'ai changé(e) depuis qu'on se connaît ?","C'est quoi la chose que tu ne t'imaginais pas ressentir et que tu ressens avec moi ?","Si tu devais écrire notre histoire en 3 phrases ?","Qu'est-ce que tu gardes de moi dans ta vie quotidienne sans t'en rendre compte ?","Quelle version de moi tu préfères et pourquoi ?","C'est quoi la chose dont tu es le plus fier(e) dans notre relation ?"],
+"Distance 🌍":["Quelle heure il est chez toi là maintenant et qu'est-ce que tu fais ?","C'est quoi ton rituel pour te sentir proche de moi quand on est loin ?","Si tu pouvais te téléporter chez moi pour 10 minutes, tu ferais quoi ?","Quelle est la chose la plus difficile de la distance pour toi ?","C'est quoi la première chose qu'on fera quand on sera ensemble ?","Comment tu imagines notre premier moment quand on se retrouve ?","Quelle est la chose qui te manque le plus physiquement ?","Comment tu occupes le vide quand tu as vraiment envie d'être avec moi ?","Comment tu t'endors les soirs où le manque est trop fort ?","Si on vivait dans la même ville, comment serait notre quotidien idéal ?","C'est quoi la chose que tu ferais en premier si tu arrivais chez moi maintenant ?","Est-ce que la distance a renforcé quelque chose dans notre relation ?","C'est quoi la routine que tu aimerais qu'on partage même à distance ?","Qu'est-ce que tu regardes ou écoutes quand tu veux te sentir proche de moi ?","Comment tu gères les soirs où la distance est vraiment trop lourde ?","C'est quoi la chose que tu n'aurais pas appris sur toi sans la distance ?","Si on pouvait habiter dans la même ville dans 6 mois, comment tu te préparerais ?","Quel rituel du matin tu voudrais qu'on partage à distance ?","Comment tu vis le fait de partager ta vie avec quelqu'un qui n'est pas là physiquement ?","C'est quoi le message que tu m'enverrais si tu savais que c'est le dernier ?"],
+"Sexualité 🔥":["Qu'est-ce qui te rend fou/folle chez moi physiquement ?","C'est quoi le baiser parfait selon toi ?","Quel fantasme tu n'as jamais osé me dire ?","Quel endroit sur ton corps tu aimerais que je découvre mieux ?","Si tu pouvais choisir une nuit parfaite avec moi, elle se passerait comment ?","Qu'est-ce qui te fait le plus envie dans nos moments intimes ?","C'est quoi le détail physique chez moi qui t'obsède ?","Comment tu aimes être touché(e) pour te sentir vraiment désiré(e) ?","C'est quoi le truc que tu n'as jamais osé demander ?","Comment tu aimes que je te montre que je te désire ?","Qu'est-ce qui te donne envie de moi même à distance ?","Comment tu imagines notre première nuit ensemble après une longue séparation ?","Qu'est-ce que tu aimerais qu'on explore ensemble ?","C'est quoi la tension la plus forte que tu aies ressentie avec moi ?","Si tu devais m'écrire un message très chaud là maintenant, tu commencerais comment ?","C'est quoi la chose qui t'excite chez moi que je ne réalise probablement pas ?","Quel endroit dans le monde tu aimerais qu'on soit intimes pour la première fois ?","Comment tu te sens après nos moments intimes ?","C'est quoi ton plus grand désir inassouvi avec moi ?","Décris en détail la scène parfaite — le lieu, l'ambiance."],
+"Famille 👨‍👩‍👧":["Comment tu imagines notre famille un jour ?","Combien d'enfants tu voudrais avoir si tu en veux ?","Quelle valeur de ta famille tu veux absolument transmettre ?","C'est quoi la tradition de ta famille que tu voudrais garder pour nous ?","Si on avait un enfant demain, comment tu l'appelerais ?","Comment tu imagines notre maison familiale idéale ?","Qu'est-ce que tu ne veux surtout pas reproduire de ton éducation ?","Quelle place tu voudrais que nos familles aient dans notre vie ?","Qu'est-ce qui t'a marqué(e) dans ton enfance de façon positive ?","Quelle serait notre règle numéro 1 pour notre foyer ?","Qu'est-ce que tu aimerais que nos enfants pensent de l'amour en nous voyant ?","Comment tu imagines Noël en famille avec nous ?","Qu'est-ce que tu as appris sur l'amour en regardant ta famille ?","C'est quoi le modèle de couple dans ta famille que tu admires ?","Comment tu gères les conflits familiaux ?","Quel rôle tu voudrais jouer dans notre future famille ?","C'est quoi la chose que tu veux que nos enfants retiennent de leur enfance ?","Si tu pouvais changer quelque chose de ton éducation, ce serait quoi ?","Comment tu imagines nos parents ensemble lors d'un repas de famille ?","C'est quoi la chose que ta famille t'a apprise sur toi-même ?"],
+"Nourriture 🍽️":["Quel est le plat de ton enfance qui te fait automatiquement sourire ?","Si tu cuisinais pour moi ce soir, ce serait quoi ?","Quel restaurant dont tu rêves qu'on aille ensemble ?","C'est quoi ton food guilty pleasure ?","Quelle cuisine du monde tu mangerais tous les jours sans te lasser ?","C'est quoi le plat que tu détestes absolument ?","Petit-déjeuner romantique au lit — tu me prépares quoi ?","Quelle est la chose la plus bizarre que tu aies mangée et aimée ?","Si tu devais me faire découvrir un plat de chez toi, ce serait lequel ?","C'est quoi ton dessert préféré et pourquoi il te rend heureux ?","Comment tu aimes ton café ou thé le matin ?","Si on ouvrait un restaurant ensemble, on cuisinerait quoi ?","Quel est ton plat réconfort pour les mauvais jours ?","Si tu devais cuisiner pour impressionner mes parents, tu ferais quoi ?","C'est quoi l'odeur de cuisine qui te rappelle les meilleurs souvenirs ?","Tu préfères cuisiner ensemble ou te faire surprendre ?","Quel marché tu adorerais explorer avec moi ?","C'est quoi ta façon de manger qui te différencie des autres ?","Si tu avais à choisir un seul plat pour toute ta vie, ce serait quoi ?","C'est quoi la chose que tu manges en secret et que tu n'assumes pas ?"],
+"Musique 🎵":["Quelle chanson te fait penser à moi dès les premières notes ?","Si ta vie était un film, quelle serait la bande originale ?","C'est quoi la chanson que tu danserais avec moi les yeux fermés ?","Quelle musique tu mets quand tu veux te sentir proche de moi ?","Si tu pouvais me chanter une chanson là maintenant, ce serait laquelle ?","C'est quoi le concert de rêve qu'on devrait voir ensemble ?","Quelle est la chanson dont les paroles te ressemblent le plus ?","Est-ce qu'il y a une chanson qui te fait pleurer sans savoir pourquoi ?","Quelle musique tu mettrais pour une soirée romantique avec moi ?","C'est quoi la chanson qui représente parfaitement notre amour ?","Quel genre de musique tu écoutes quand tu as besoin de te ressourcer ?","Si tu devais composer une chanson pour moi, elle parlerait de quoi ?","C'est quoi le souvenir musical le plus fort de ta vie ?","Quelle chanson tu voudrais qu'on danse à notre mariage ?","Quel artiste tu voudrais absolument que je découvre ?","C'est quoi la playlist parfaite pour un road trip avec moi ?","Quelle musique te met dans le meilleur état d'esprit le matin ?","C'est quoi ta chanson honteuse que tu écoutes en secret ?","Est-ce qu'il y a une chanson que tu ne peux plus écouter à cause d'un souvenir douloureux ?","C'est quoi la chanson qui dit tout ce que tu ressens pour moi sans qu'on l'ait choisie ?"],
+"Rêves 🌟":["Où tu te vois dans 5 ans — et est-ce que je suis dans ce futur ?","C'est quoi le rêve que tu n'as dit à presque personne ?","Quelle est la chose que tu veux absolument accomplir avant tes 40 ans ?","Comment tu imagines notre vie dans 10 ans ?","Si l'argent n'était pas un problème, comment tu passerais ta vie ?","C'est quoi ta définition personnelle du succès ?","Quel pays tu veux absolument habiter au moins une fois ?","C'est quoi le projet qui te fait le plus peur et le plus exciter en même temps ?","Comment tu imagines ta retraite idéale ?","Si tu écrivais un livre sur ta vie, quel serait le titre ?","Quel héritage tu veux laisser derrière toi ?","Si on pouvait tout plaquer et partir demain, on irait où ?","Comment tu vois l'évolution de notre relation dans les 3 prochaines années ?","C'est quoi le projet qu'on devrait lancer ensemble un jour ?","Quelle version de toi tu veux être dans 5 ans ?","C'est quoi la chose qui te manque pour te sentir vraiment accompli(e) ?","Si tu devais choisir entre carrière de rêve loin de moi ou vie simple ensemble ?","Comment tu imagines notre maison idéale — décris chaque pièce ?","C'est quoi le truc que tu veux apprendre avant de mourir ?","Si tu avais une seule chance de tout recommencer, tu changerais quoi ?"],
+"Émotions 😊":["Comment tu vas vraiment là, au fond ?","C'est quoi la dernière chose qui t'a vraiment touché(e) émotionnellement ?","Comment tu gères la colère ?","C'est quoi la chose qui te recharge quand tu es à plat ?","Qu'est-ce qui te rend heureux/heureuse de façon simple et immédiate ?","Est-ce qu'il y a quelque chose qui te pèse en ce moment et que tu n'as pas dit ?","Comment tu fais pour ne pas te perdre dans les moments difficiles ?","Quelle est l'émotion que tu as du mal à exprimer à voix haute ?","Comment tu aimes être réconforté(e) quand tu vas pas bien ?","Quelle est la dernière fois que tu as ri aux larmes et pourquoi ?","Comment tu sais que tu es vraiment heureux/heureuse ?","Comment est-ce que je peux savoir que tu ne vas pas bien sans que tu le dises ?","C'est quoi ta façon de traiter une tristesse profonde ?","Quelle émotion tu n'acceptes pas facilement chez toi-même ?","C'est quoi la dernière fois où tu t'es senti(e) vraiment compris(e) ?","Comment tu te comportes quand tu es blessé(e) mais que tu ne veux pas le montrer ?","Quel est ton mécanisme de défense quand tu te sens vulnérable ?","Quelle émotion tu ressens le plus souvent sans raison apparente ?","C'est quoi la petite chose du quotidien qui te met de bonne humeur ?","Comment tu réagis quand tu te sens débordé(e) par les émotions ?"],
+"Cinéma 🎬":["C'est quoi le film qui t'a marqué(e) à vie ?","Quel personnage de film tu aurais voulu être ?","Si ta vie était un film, ce serait quel genre ?","C'est quoi la série que tu as regardée en mode binge sans dormir ?","Quel film tu veux absolument qu'on regarde ensemble ?","C'est quoi la scène de film qui t'a fait pleurer le plus ?","Si tu pouvais vivre dans l'univers d'une série, laquelle ?","C'est quoi le film d'amour qui te donne envie de croire en l'amour ?","Si on tournait un film sur notre histoire, qui jouerait nos rôles ?","C'est quoi la série que tu regarderais en boucle sans jamais te lasser ?","C'est quoi le twist de film qui t'a le plus choqué(e) ?","Si tu devais choisir un film pour décrire notre relation, lequel ?","Quel film tu regardes quand tu es triste et que tu veux pleurer un bon coup ?","C'est quoi le personnage de fiction qui te ressemble le plus ?","Si on devait faire un marathon de films ce soir, tu mettrais quoi ?","C'est quoi la série que tu m'imposerais de regarder en premier ?","Quel film t'a fait changer de perspective sur la vie ?","C'est quoi la scène de film la plus romantique qui t'ait touché(e) ?","Si tu pouvais entrer dans un film, lequel et pourquoi ?","C'est quoi le film le plus nul que tu aies regardé jusqu'au bout par curiosité ?"],
+"Voyage ✈️":["C'est quoi la destination de rêve en tête de ta bucket list ?","Quel voyage t'a le plus transformé(e) ?","Si on partait en vacances demain, on irait où ?","Tu préfères la mer, la montagne ou la ville ?","C'est quoi l'aventure la plus folle que tu veux vivre ?","Si on pouvait habiter dans un autre pays pendant 1 an, lequel ?","Quel est le souvenir de voyage le plus marquant de ta vie ?","Tu es plutôt hôtel de luxe ou aventure sauvage ?","C'est quoi la première chose que tu fais dans une nouvelle ville ?","Quel endroit sur terre tu veux voir avant de mourir ?","Si on faisait un road trip ensemble, quelle route ?","C'est quoi la culture qui te fascine le plus ?","Quel voyage tu ferais juste pour la nourriture locale ?","C'est quoi le souvenir de voyage le plus drôle que tu aies vécu ?","Quel pays tu ne retournerais jamais et pourquoi ?","Si on devait vivre 3 mois dans un pays étranger, comment on l'organiserait ?","Quel paysage tu rêves de voir avec moi en vrai ?","C'est quoi ta façon idéale de se perdre dans une ville étrangère ?","Tu préfères voyager léger ou avoir tout dans ta valise ?","C'est quoi la ville qui t'a donné le plus l'impression d'être chez toi ?"],
+"Personnalité 🧠":["C'est quoi ton plus grand défaut que tu travailles ?","Quelle est ta plus grande qualité selon toi ?","Comment tu réagis sous pression ?","C'est quoi la chose que peu de gens savent de toi ?","Si tes amis devaient te décrire en 3 mots ?","C'est quoi ta valeur numéro 1 dans la vie ?","Comment tu prends tes décisions importantes ?","Qu'est-ce qui te rend le plus fier(e) de la personne que tu es ?","C'est quoi ton plus grand combat intérieur en ce moment ?","Comment tu réagis quand quelqu'un te déçoit profondément ?","Quelle est la chose la plus courageuse que tu aies jamais faite ?","C'est quoi la chose que tu fais naturellement qui impressionne les autres ?","Comment tu définis la loyauté pour toi ?","Quelle est la période de ta vie où tu as le plus grandi ?","Comment tu gères l'échec ?","C'est quoi la croyance sur toi-même que tu travailles à changer ?","Comment tu te comportes quand personne ne te regarde ?","C'est quoi la différence entre la personne que tu es et celle que tu veux être ?","Quel est ton mécanisme préféré pour te motiver ?","C'est quoi la chose que les autres ne comprennent pas toujours chez toi ?"],
+"Peurs 🔮":["C'est quoi ta peur la plus profonde ?","Quelle est la chose que tu n'as jamais dite à personne ?","Est-ce qu'il y a quelque chose que tu regrettes profondément ?","Qu'est-ce qui te terrifie dans l'idée de nous perdre ?","Quelle est la partie de toi que tu montres le moins ?","C'est quoi la pensée que tu as souvent et qui te surprend toi-même ?","Quelle est la décision dont tu n'es toujours pas sûr(e) ?","Est-ce qu'il y a quelque chose concernant notre relation qui te fait peur en secret ?","C'est quoi le souvenir que tu voudrais pouvoir effacer ?","Quelle est la chose que tu fais quand personne ne te regarde ?","C'est quoi la vérité sur toi que tu as du mal à admettre ?","Est-ce qu'il y a une partie de toi que tu caches parce que tu penses que je ne comprendrais pas ?","C'est quoi ta plus grande honte secrète ?","Quelle est la chose que tu ferais si tu savais que personne ne le saurait jamais ?","Est-ce qu'il y a quelque chose dans notre relation que tu n'oses pas aborder ?","C'est quoi la chose dont tu as le plus peur dans l'avenir ?","Quel est ton pire scénario dans la vie ?","Est-ce qu'il y a quelqu'un de ton passé dont tu penses encore souvent ?","C'est quoi la chose que tu gardes pour toi même avec moi ?","Qu'est-ce que tu ne t'es jamais pardonné(e) ?"],
+"Fun 😂":["Si tu étais un animal, tu serais lequel ?","C'est quoi la chose la plus ridicule que tu aies fait pour impressionner quelqu'un ?","Quel est ton super pouvoir inutile ?","Quelle est la chose la plus random qui te rend heureux/heureuse ?","Si tu étais un plat, tu serais quoi ?","C'est quoi le truc le plus bizarre que tu aies fait tout seul(e) chez toi ?","Quel est ton talent caché complètement inutile ?","C'est quoi ta façon la plus bizarre de manger un aliment normal ?","Quel est le surnom le plus étrange qu'on t'ait jamais donné ?","Si tu devais écrire ton autobiographie, quel serait le titre ?","C'est quoi la chose la plus impulsive que tu aies faite ?","Si tu pouvais changer de prénom, tu t'appellerais comment ?","C'est quoi l'excuse la plus créative que tu aies inventée ?","Quel est le truc le plus puéril que tu fasses encore adulte ?","Si tu devais survivre sur une île déserte avec 3 objets, lesquels ?","C'est quoi la chose la plus embarrassante qui te soit arrivée en public ?","Si tu pouvais effacer un seul souvenir gênant, lequel ?","C'est quoi la blague que tu trouves hilarante mais que personne ne comprend ?","Quel film ou série tu regarderais en boucle sans jamais t'en lasser ?","C'est quoi la chose la plus bizarre que tu manges en combinaison ?"],
+};
+const TN=Object.keys(TH);
+let curTheme=null,curQ=null,curQT=null;
+let usedQ=getJ('us_uq')||[];
+
+function buildThemes(){
+  const bar=document.getElementById('themes-bar');if(!bar)return;
+  bar.innerHTML='';
+  const a=document.createElement('button');a.className='btn-s';a.style.cssText='font-size:.52rem;padding:5px 12px;border-radius:20px';a.textContent='🎲 Tous';
+  a.onclick=()=>{curTheme=null;document.querySelectorAll('#themes-bar button').forEach(b=>b.style.background='');a.style.background='var(--rouge)';a.style.color='#fff';a.style.border='none';newQ()};
+  bar.appendChild(a);
+  TN.forEach(t=>{
+    const b=document.createElement('button');b.className='btn-s';b.style.cssText='font-size:.52rem;padding:5px 11px;border-radius:20px';b.textContent=t;
+    b.onclick=()=>{curTheme=t;document.querySelectorAll('#themes-bar button').forEach(x=>x.style.background='');b.style.background='var(--rouge)';b.style.color='#fff';b.style.border='none';newQ()};
+    bar.appendChild(b);
+  });
+}
+function genQ(t){
+  const pool=t?TH[t]:Object.values(TH).flat();
+  const dispo=pool.filter(q=>!usedQ.includes(q));
+  if(!dispo.length){usedQ=[];set('us_uq',usedQ)}
+  const src=dispo.length?dispo:pool;
+  return src[Math.floor(Math.random()*src.length)];
+}
+function newQ(){
+  const card=document.getElementById('q-card');
+  if(card){card.style.opacity='0';card.style.transform='scale(.97)';card.style.transition='all .2s'}
+  setTimeout(()=>{
+    const t=curTheme||TN[Math.floor(Math.random()*TN.length)];
+    const q=genQ(curTheme);curQ=q;curQT=t;
+    usedQ.push(q);set('us_uq',usedQ);
+    document.getElementById('q-text').textContent=q;
+    document.getElementById('q-theme').textContent=t;
+    document.getElementById('q-num').textContent=usedQ.length+' / '+Object.values(TH).flat().length;
+    document.getElementById('rep1').value='';document.getElementById('rep2').value='';
+    document.getElementById('saved-ok').style.display='none';
+    if(card){card.style.opacity='1';card.style.transform='scale(1)'}
+    gainXP(3);
+    const c=parseInt(get('us_qc')||'0')+1;set('us_qc',c);ckBdg('q10',c>=10);
+  },200);
+}
+function newQSameTheme(){const s=curTheme;curTheme=curQT;newQ();curTheme=s}
+function saveReps(){
+  const r1=document.getElementById('rep1').value.trim();
+  const r2=document.getElementById('rep2').value.trim();
+  if(!r1&&!r2)return;
+  const now=new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  const h=getJ('us_hist')||[];
+  h.unshift({q:curQ||document.getElementById('q-text').textContent,t:curQT||'—',r1,r2,n1:N1,n2:N2,date:now});
+  set('us_hist',h);cloudSave('us_hist',h);
+  document.getElementById('saved-ok').style.display='block';
+  setTimeout(()=>document.getElementById('saved-ok').style.display='none',2000);
+  gainXP(10);renderQHist();
+}
+function renderQHist(){
+  const list=document.getElementById('q-hist');if(!list)return;
+  const d=getJ('us_hist')||[];
+  if(!d.length){list.innerHTML='<div style="text-align:center;color:var(--gris);font-style:italic;padding:14px;font-size:.78rem">Vos réponses sauvegardées apparaîtront ici 💕</div>';return}
+  list.innerHTML=d.map(h=>`
+    <div style="background:var(--creme);border:1px solid var(--creme2);border-radius:10px;padding:12px">
+      <div style="font-size:.42rem;letter-spacing:.16em;text-transform:uppercase;color:var(--or);font-family:sans-serif">${h.t}</div>
+      <div style="font-size:.76rem;font-style:italic;color:var(--brun2);margin:5px 0 8px;line-height:1.5">${h.q}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
+        ${h.r1?`<div style="background:var(--blanc);border-radius:6px;padding:7px 9px"><div style="font-size:.4rem;letter-spacing:.16em;text-transform:uppercase;color:var(--or);margin-bottom:3px;font-family:sans-serif">${h.n1}</div><div style="font-size:.68rem;color:var(--brun);line-height:1.5">${h.r1}</div></div>`:''}
+        ${h.r2?`<div style="background:var(--blanc);border-radius:6px;padding:7px 9px"><div style="font-size:.4rem;letter-spacing:.16em;text-transform:uppercase;color:var(--or);margin-bottom:3px;font-family:sans-serif">${h.n2}</div><div style="font-size:.68rem;color:var(--brun);line-height:1.5">${h.r2}</div></div>`:''}
+      </div>
+      <div style="font-size:.4rem;color:var(--gris);margin-top:6px;font-family:sans-serif">${h.date}</div>
+    </div>`).join('');
+}
+(()=>{const q=genQ(null);curQ=q;curQT=TN[0];const el=document.getElementById('q-text');if(el){el.textContent=q;document.getElementById('q-num').textContent='1 / '+Object.values(TH).flat().length}})();
+
+// ===== VERITE OU DEFI =====
+const VOD={
+  verite:{fun:["C'est quoi la chose la plus embarrassante que tu aies faite devant quelqu'un ?","Quel est le mensonge le plus ridicule que tu aies raconté ?","C'est quoi ton crush le plus bizarre de toute ta vie ?","Quelle est la recherche la plus bizarre que tu aies faite sur Google ?","C'est quoi la chose dont tu aies le plus honte dans ta garde-robe ?"],
+  intime:["Quelle est la chose la plus courageuse que tu aies jamais faite pour l'amour ?","C'est quoi ton plus grand regret dans une relation ?","Qu'est-ce que tu n'as jamais pardonné à quelqu'un ?","C'est quoi la peur que tu caches même à toi-même ?","Qu'est-ce que tu penses de nous deux dans les moments de doute ?"],
+  profond:["Si tu pouvais changer une seule chose dans ta vie, ce serait quoi ?","C'est quoi la chose que tu n'as jamais dite à tes parents ?","Quel est le moment où tu t'es senti(e) le plus seul(e) ?","C'est quoi ton plus grand combat intérieur en ce moment ?","Qu'est-ce qui te fait vraiment peur dans l'avenir ?"],
+  romantique:["C'est quoi le moment exact où tu as su que tu m'aimais ?","Quelle est la chose que tu n'oses pas me dire mais que tu penses souvent ?","Si tu pouvais me donner une seule chose ce soir, ce serait quoi ?","C'est quoi le geste de moi qui te touche le plus profondément ?","Décris notre amour avec une métaphore inédite."]},
+  defi:{fun:["Envoie-moi une photo de toi faisant la tête la plus ridicule possible.","Chante 30 secondes d'une chanson que tu détestes.","Écris une déclaration d'amour uniquement avec des émojis.","Envoie-moi un selfie dans la position la plus bizarre possible.","Imite un animal pendant 10 secondes — envoie la vidéo."],
+  intime:["Écris-moi 3 choses que tu aimes chez moi que tu ne m'as jamais dites.","Envoie-moi un message vocal de 1 minute en me disant ce que tu ressens.","Dessine quelque chose qui me représente et envoie la photo.","Écris-moi une lettre de 5 lignes comme si c'était la dernière.","Envoie-moi la photo qui te rend le plus nostalgique en ce moment."],
+  romantique:["Mets notre chanson et danse seul(e) — envoie une vidéo de 10 secondes.","Prépare-toi comme si on avait un rendez-vous ce soir — envoie une photo.","Écris-moi un poème de 4 vers.","Allume une bougie ce soir et pense à nous pendant 2 minutes.","Envoie-moi un message à minuit pour me dire ce que tu ressens."],
+  profond:["Écris 5 choses que tu veux accomplir dans les 12 prochains mois.","Fais quelque chose de gentil pour quelqu'un aujourd'hui et dis-moi ce que c'était.","Prends une photo de l'endroit où tu es le plus heureux/heureuse chez toi.","Écris ce que tu veux que je sache sur toi que je ne sais pas encore.","Enregistre un message vocal sur ce qu'on devrait faire ensemble un jour."]}
+};
+let vodT='verite',vodC='fun';
+function buildVodCats(){
+  const div=document.getElementById('vod-cats');if(!div)return;
+  [['fun','😂 Fun'],['intime','💙 Intime'],['profond','🌙 Profond'],['romantique','💕 Romantique']].forEach(([c,l])=>{
+    const b=document.createElement('button');b.className='btn-s';b.style.cssText='font-size:.52rem;padding:5px 11px;border-radius:20px';b.textContent=l;
+    b.onclick=()=>{vodC=c;document.querySelectorAll('#vod-cats button').forEach(x=>x.style.background='');b.style.background='var(--rouge)';b.style.color='#fff';b.style.border='none';newVod(vodT)};
+    div.appendChild(b);
+  });
+}
+function newVod(t){
+  if(t==='random')t=Math.random()>.5?'verite':'defi';
+  vodT=t;
+  const pool=VOD[t][vodC]||VOD[t].fun;
+  const txt=pool[Math.floor(Math.random()*pool.length)];
+  const card=document.getElementById('vod-card');
+  const isV=t==='verite';
+  card.style.background=isV?'linear-gradient(135deg,var(--bleu),#2a5d9e)':'linear-gradient(135deg,#7a4f1f,#c9832a)';
+  document.getElementById('vod-type').textContent=isV?'💙 Vérité':'🔥 Défi';
+  document.getElementById('vod-text').textContent=txt;
+  gainXP(5);ckBdg('vod1',true);
+}
+
+// ===== DEVINE HUMEUR =====
+const HUMEURS=[{i:'😊',n:'Heureux(se)',h:'A eu quelque chose de positif récemment'},{i:'😔',n:'Mélancolique',h:'Nostalgique ou un peu triste'},{i:'😤',n:'Frustré(e)',h:'Quelque chose ne s\'est pas passé comme prévu'},{i:'🥰',n:'Amoureux(se)',h:'Tu es dans ses pensées'},{i:'😴',n:'Fatigué(e)',h:'Manque de repos'},{i:'😰',n:'Anxieux(se)',h:'Quelque chose l\'inquiète'},{i:'🤩',n:'Excité(e)',h:'Un projet ou une nouvelle la rend fébrile'},{i:'😌',n:'Paisible',h:'Dans un état de calme intérieur'},{i:'🥺',n:'Nostalgique',h:'Pense au passé avec émotion'},{i:'💪',n:'Motivé(e)',h:'Se sent prêt(e) à tout conquérir'}];
+let hTgt=null,hTries=3;
+function buildHumeur(){
+  const opts=document.getElementById('h-opts');const setEl=document.getElementById('h-set');
+  if(!opts)return;
+  opts.innerHTML='';setEl.innerHTML='';
+  HUMEURS.forEach(h=>{
+    const b=document.createElement('button');
+    b.style.cssText='padding:8px 13px;background:var(--creme);border:1px solid var(--creme2);border-radius:20px;cursor:pointer;font-size:.76rem;transition:all .3s;font-family:inherit';
+    b.textContent=h.i+' '+h.n;b.onclick=()=>guessH(b,h);opts.appendChild(b);
+    const b2=document.createElement('button');
+    b2.style.cssText='padding:8px 13px;background:var(--creme);border:1px solid var(--creme2);border-radius:20px;cursor:pointer;font-size:.76rem;transition:all .3s;font-family:inherit';
+    b2.textContent=h.i+' '+h.n;b2.onclick=()=>setH(b2,h);setEl.appendChild(b2);
+  });
+  newHumeur();
+}
+function newHumeur(){
+  const s=get('us_htgt');hTgt=s?JSON.parse(s):HUMEURS[Math.floor(Math.random()*HUMEURS.length)];
+  hTries=3;document.getElementById('h-tries').textContent=3;
+  document.getElementById('h-hint').textContent='';document.getElementById('h-result').style.display='none';
+  document.querySelectorAll('#h-opts button').forEach(b=>b.style.cssText='padding:8px 13px;background:var(--creme);border:1px solid var(--creme2);border-radius:20px;cursor:pointer;font-size:.76rem;font-family:inherit');
+}
+function guessH(btn,h){
+  if(hTries<=0)return;
+  if(h.n===hTgt.n){
+    btn.style.background='rgba(45,122,79,.2)';btn.style.borderColor='var(--vert)';
+    const r=document.getElementById('h-result');r.style.display='block';r.style.cssText='display:block;padding:12px;border-radius:8px;font-size:.8rem;text-align:center;background:rgba(45,122,79,.1);color:var(--vert)';
+    r.textContent='✓ Bravo ! Deviné en '+(4-hTries)+' tentative(s) !';gainXP(20);
+  } else {
+    btn.style.background='rgba(122,31,46,.1)';btn.style.borderColor='var(--rouge)';btn.disabled=true;
+    hTries--;document.getElementById('h-tries').textContent=hTries;
+    if(hTries<=2)document.getElementById('h-hint').textContent='💡 '+hTgt.h;
+    if(hTries===0){const r=document.getElementById('h-result');r.style.display='block';r.style.cssText='display:block;padding:12px;border-radius:8px;font-size:.8rem;text-align:center;background:rgba(122,31,46,.08);color:var(--rouge)';r.textContent='La réponse était : '+hTgt.i+' '+hTgt.n}
+  }
+}
+function setH(btn,h){
+  document.querySelectorAll('#h-set button').forEach(b=>b.style.background='var(--creme)');
+  btn.style.background='rgba(45,122,79,.2)';btn.style.borderColor='var(--vert)';
+  set('us_htgt',JSON.stringify(h));hTgt=h;toast('Ton humeur : '+h.i+' '+h.n);gainXP(5);
+}
+
+// ===== JE T'AURAIS DIT =====
+const JTD=["Si j'étais une saison, je serais _____ parce que…","Si notre amour était un film, il s'appellerait…","Le jour où j'ai compris que je t'aimais, je me suis dit…","Ce que je n'arrive pas à te dire à voix haute c'est…","Quand tu me manques, je fais toujours…","La chose qui me rend le plus heureux/heureuse chez nous c'est…","Si j'avais une seule chose à te demander, ce serait…","Mon endroit préféré au monde c'est _____ parce que…","Ce qui me fait le plus peur dans notre histoire c'est…","Si je pouvais changer une chose dans notre relation, ce serait…","La prochaine fois qu'on se voit, je veux absolument…","Mon moment parfait avec toi c'est quand on…","Ce que j'aurais aimé te dire le premier jour c'est…","Si notre relation était une couleur elle serait _____ parce que…","Le geste de toi dont je me souviendrai toujours c'est…","Dans 10 ans, je nous imagine…","La chose que tu fais et qui me fait fondre sans raison c'est…","Si je devais te décrire à quelqu'un qui ne te connaît pas, je dirais…","Mon meilleur souvenir de nous c'est quand on…","La chanson qui me fait penser à toi sans raison c'est…","Ce que tu m'as appris sur moi-même c'est…","Si je pouvais vivre une journée de ta vie, je ferais d'abord…","Ce que je remercie la vie d'avoir mis sur mon chemin c'est toi parce que…","La version de moi que tu préfères c'est quand je…","Si j'avais peur de te perdre, la première chose que je ferais c'est…"];
+let curJtd=JTD[0];
+function newJtd(){
+  curJtd=JTD[Math.floor(Math.random()*JTD.length)];
+  document.getElementById('jtd-phrase').innerHTML=curJtd.replace('_____','<span style="color:var(--or2);font-weight:700">_____</span>');
+  document.getElementById('jr1').value='';document.getElementById('jr2').value='';gainXP(3);
+  const c=parseInt(get('us_jtdc')||'0')+1;set('us_jtdc',c);ckBdg('jtd10',c>=10);
+}
+function saveJtd(){
+  const r1=document.getElementById('jr1').value.trim();const r2=document.getElementById('jr2').value.trim();
+  if(!r1&&!r2)return;
+  const h=getJ('us_jtd')||[];const now=new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+  h.unshift({p:curJtd,r1,r2,n1:N1,n2:N2,date:now});set('us_jtd',h);cloudSave('us_jtd',h);gainXP(10);renderJtdHist();toast('Sauvegardé ✓');
+}
+function renderJtdHist(){
+  const list=document.getElementById('jtd-hist');if(!list)return;
+  const d=getJ('us_jtd')||[];
+  if(!d.length){list.innerHTML='<div style="text-align:center;color:var(--gris);font-style:italic;padding:12px;font-size:.76rem">Vos réponses apparaîtront ici</div>';return}
+  list.innerHTML=d.map(h=>`
+    <div style="background:var(--creme);border:1px solid var(--creme2);border-radius:9px;padding:12px">
+      <div style="font-size:.72rem;font-style:italic;color:var(--brun2);margin-bottom:7px;line-height:1.5">${h.p}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        ${h.r1?`<div style="background:var(--blanc);border-radius:6px;padding:7px"><div style="font-size:.4rem;letter-spacing:.15em;text-transform:uppercase;color:var(--or);margin-bottom:2px;font-family:sans-serif">${h.n1}</div><div style="font-size:.68rem;color:var(--brun)">${h.r1}</div></div>`:''}
+        ${h.r2?`<div style="background:var(--blanc);border-radius:6px;padding:7px"><div style="font-size:.4rem;letter-spacing:.15em;text-transform:uppercase;color:var(--or);margin-bottom:2px;font-family:sans-serif">${h.n2}</div><div style="font-size:.68rem;color:var(--brun)">${h.r2}</div></div>`:''}
+      </div>
+      <div style="font-size:.4rem;color:var(--gris);margin-top:5px;font-family:sans-serif">${h.date}</div>
+    </div>`).join('');
+}
+
+// ===== RADAR =====
+const RM={think:["En ce moment tu traverses mon esprit comme une lumière douce…","Quelque chose dans l'air m'a rappelé toi.","Sans raison précise, tu es là dans mes pensées."],call:["Ta voix me manque. Un appel ce soir ?","J'ai envie d'entendre ton rire.","Rien que ta voix, ça me suffirait."],photo:["Envoie-moi une photo de toi là maintenant. 📸","Je veux te voir, même juste en photo.","Capture un instant de ta journée pour moi."],miss:["La distance est là, mais toi tu me manques encore plus.","Ce vide à côté de moi a la forme exacte de toi.","Tu me manques. Juste ça."],love:["Je t'aime. Même de loin. Surtout de loin.","Trois mots, mille kilomètres, un seul sentiment."],night:["Bonne nuit mon amour. Rêve de nous.","Dors bien. Je veille sur toi depuis ici. 🌙"],dream:["J'ai rêvé de toi cette nuit.","Mon subconscient te choisit même quand je dors."],hug:["J'ai juste besoin que tu sois là.","Un câlin virtuel, mais le sentiment est bien réel."],music:["Il y a une chanson qui joue et je ne pense qu'à toi.","Cette musique a ta voix dans chaque mesure."]};
+let rCnt=0;
+function fireR(btn,t){
+  const msgs=RM[t];const msg=msgs[Math.floor(Math.random()*msgs.length)];
+  const box=document.getElementById('radar-msg');
+  box.innerHTML='<p style="font-size:.88rem;color:var(--brun);font-style:italic;line-height:1.6">'+msg+'</p>';
+  gainXP(5);rCnt++;ckBdg('r5',rCnt>=5);toast('Signal envoyé 💫');
+}
+
+// ===== PUZZLE =====
+const PCOLS=[['#2d6a4f','#40916c','#52b788','#74c69d','#95d5b2','#b7e4c7','#d8f3dc','#1b4332','#081c15','#52b788'],['#03045e','#023e8a','#0077b6','#0096c7','#00b4d8','#48cae4','#90e0ef','#ade8f4','#caf0f8','#023e8a'],['#f94144','#f3722c','#f8961e','#f9844a','#f9c74f','#90be6d','#43aa8b','#577590','#f94144','#f3722c'],['#10002b','#240046','#3c096c','#5a189a','#7b2d8b','#9d4edd','#c77dff','#e0aaff','#240046','#3c096c'],['#ffb3c1','#ff85a1','#ff4d6d','#c9184a','#a4133c','#800f2f','#590d22','#ffb3c1','#ff85a1','#ffd6ff']];
+const PNAMES=['🌺 Nature','🌊 Océan','🌅 Coucher de soleil','💜 Galaxie','🌸 Sakura'];
+let pgrid=3,ppcs=[],pSel=null,pMv=0,pTm=0,pRun=false,pCur=0;
+function buildPuzThemes(){
+  const div=document.getElementById('puz-themes');if(!div)return;div.innerHTML='';
+  PNAMES.forEach((n,i)=>{
+    const b=document.createElement('button');b.className='btn-s';b.style.cssText='font-size:.52rem;padding:4px 11px;border-radius:20px';b.textContent=n;
+    if(i===pCur){b.style.background='var(--rouge)';b.style.color='#fff';b.style.border='none'}
+    b.onclick=()=>{pCur=i;document.querySelectorAll('#puz-themes button').forEach(x=>{x.style.background='';x.style.color=''});b.style.background='var(--rouge)';b.style.color='#fff';b.style.border='none';initPuz()};
+    div.appendChild(b);
+  });
+}
+function setLvl(btn,n){pgrid=n;document.querySelectorAll('.plvl').forEach(b=>b.classList.remove('active'));btn.classList.add('active');initPuz();if(n>=6)ckBdg('p6',true);else ckBdg('p3',true)}
+function initPuz(){
+  buildPuzThemes();pMv=0;pTm=0;pRun=false;pSel=null;
+  document.getElementById('p-mv').textContent='0';document.getElementById('p-tm').textContent='0:00';document.getElementById('p-win').style.display='none';
+  const tot=pgrid*pgrid;ppcs=Array.from({length:tot},(_,i)=>i);
+  for(let i=ppcs.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[ppcs[i],ppcs[j]]=[ppcs[j],ppcs[i]]}
+  renderPuz();
+}
+function renderPuz(){
+  const board=document.getElementById('p-board');if(!board)return;
+  const sz=Math.min(310,window.innerWidth-48);const ps=Math.floor(sz/pgrid);
+  board.style.gridTemplateColumns=`repeat(${pgrid},${ps}px)`;
+  const cols=PCOLS[pCur];
+  board.innerHTML=ppcs.map((v,idx)=>{
+    const ok=v===idx;
+    return `<div style="width:${ps}px;height:${ps}px;background:${cols[v%cols.length]};border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:${ps*.28}px;font-weight:700;color:rgba(255,255,255,.85);text-shadow:0 1px 3px rgba(0,0,0,.5);cursor:pointer;transition:all .15s;border:2px solid ${pSel===idx?'var(--or)':ok?'var(--vert)':'transparent'};transform:${pSel===idx?'scale(1.07)':'scale(1)'}" onclick="clickPuz(${idx})">${v+1}</div>`;
+  }).join('');
+}
+function clickPuz(idx){
+  if(!pRun){pRun=true}
+  if(pSel===null){pSel=idx}else{
+    if(pSel!==idx){[ppcs[pSel],ppcs[idx]]=[ppcs[idx],ppcs[pSel]];pMv++;document.getElementById('p-mv').textContent=pMv}
+    pSel=null;renderPuz();checkPuzWin();return;
+  }renderPuz();
+}
+function hintPuz(){for(let i=0;i<ppcs.length;i++){if(ppcs[i]!==i){const ci=ppcs.indexOf(i);[ppcs[i],ppcs[ci]]=[ppcs[ci],ppcs[i]];pMv++;document.getElementById('p-mv').textContent=pMv;renderPuz();checkPuzWin();toast('💡 Une pièce replacée !');return}}}
+function tickPuz(){if(!pRun)return;pTm++;const m=Math.floor(pTm/60),s=pTm%60;const el=document.getElementById('p-tm');if(el)el.textContent=m+':'+String(s).padStart(2,'0')}
+function checkPuzWin(){
+  if(!ppcs.every((v,i)=>v===i))return;
+  pRun=false;
+  const win=document.getElementById('p-win');win.style.display='block';
+  document.getElementById('p-win-msg').textContent='Complété en '+pMv+' mouvements et '+document.getElementById('p-tm').textContent+' !';
+  const k='us_pb_'+pgrid;const best=parseInt(get(k)||'9999');
+  if(pTm<best){set(k,pTm);document.getElementById('p-bst').textContent=document.getElementById('p-tm').textContent}
+  gainXP(30);toast('🧩 Puzzle complété ! +30 XP');
+}
+
+// ===== RITUELS =====
+function saveMot(){
+  const m1=document.getElementById('mot1').value.trim();const m2=document.getElementById('mot2').value.trim();
+  if(!m1&&!m2)return;
+  const now=new Date();const wk=Math.ceil(((now-new Date(now.getFullYear(),0,1))/864e5+new Date(now.getFullYear(),0,1).getDay()+1)/7);
+  const arch=getJ('us_mots')||[];
+  arch.unshift({w:'Semaine '+wk+' · '+now.getFullYear(),m1,m2,n1:N1,n2:N2});
+  set('us_mots',arch);cloudSave('us_mots',arch);document.getElementById('mot1').value='';document.getElementById('mot2').value='';
+  gainXP(15);ckBdg('mot',true);ckBdg('wk1',true);renderMotArch();toast('Mots sauvegardés ✓');
+}
+function renderMotArch(){
+  const div=document.getElementById('mot-arch');if(!div)return;
+  const d=getJ('us_mots')||[];
+  if(!d.length){div.innerHTML='<div style="text-align:center;color:var(--gris);font-style:italic;padding:14px;font-size:.78rem">Votre première semaine apparaîtra ici 💕</div>';return}
+  div.innerHTML=d.map(x=>`
+    <div style="background:var(--blanc);border:1px solid var(--creme2);border-radius:10px;padding:14px">
+      <div style="font-size:.46rem;letter-spacing:.18em;text-transform:uppercase;color:var(--or);margin-bottom:7px;font-family:sans-serif">${x.w}</div>
+      <div style="display:flex;gap:12px">
+        ${x.m1?`<div style="flex:1;text-align:center"><div style="font-size:.44rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gris);font-family:sans-serif;margin-bottom:3px">${x.n1}</div><div style="font-size:1.05rem;font-style:italic;color:var(--brun2)">${x.m1}</div></div>`:''}
+        ${x.m2?`<div style="flex:1;text-align:center"><div style="font-size:.44rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gris);font-family:sans-serif;margin-bottom:3px">${x.n2}</div><div style="font-size:1.05rem;font-style:italic;color:var(--brun2)">${x.m2}</div></div>`:''}
+      </div>
+    </div>`).join('');
+}
+let phData=null;
+function loadPhSem(input){const f=input.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{phData=e.target.result;const p=document.getElementById('ph-prev');p.src=e.target.result;p.style.display='block'};r.readAsDataURL(f)}
+function savePhSem(){
+  if(!phData){toast('Sélectionne une photo d\'abord');return}
+  const comment=document.getElementById('ph-comment').value.trim();
+  const who=document.getElementById('ph-who').value;
+  const now=new Date();const wk=Math.ceil(((now-new Date(now.getFullYear(),0,1))/864e5+new Date(now.getFullYear(),0,1).getDay()+1)/7);
+  const ph=getJ('us_phsem')||[];ph.unshift({src:phData,comment,who,week:'Semaine '+wk});
+  try{set('us_phsem',ph)}catch(e){set('us_phsem',ph.slice(0,4))}
+  document.getElementById('ph-comment').value='';document.getElementById('ph-prev').style.display='none';phData=null;
+  gainXP(15);ckBdg('photo',true);renderPhGrid();toast('Photo ajoutée ✓');
+}
+function renderPhGrid(){
+  const g=document.getElementById('ph-grid');if(!g)return;
+  const d=getJ('us_phsem')||[];
+  if(!d.length){g.innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--gris);font-style:italic;padding:14px">Votre album apparaîtra ici 📷</div>';return}
+  g.innerHTML=d.map(p=>`<div style="border-radius:9px;overflow:hidden;position:relative;aspect-ratio:1;background:var(--creme)"><img src="${p.src}" style="width:100%;height:100%;object-fit:cover"/><div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.7));padding:7px"><div style="font-size:.42rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.7);font-family:sans-serif">${p.who} · ${p.week}</div>${p.comment?`<div style="font-size:.62rem;color:#fff;font-style:italic">${p.comment}</div>`:''}</div></div>`).join('');
+}
+const MM=[{cat:'🎵 Musique',items:["Mettez la même chanson et écoutez-la ensemble","Fredonnez la même mélodie au même moment","Écoutez votre chanson préférée à vous deux en même temps"]},{cat:'🍵 Nourriture',items:["Préparez le même thé ou café et buvez ensemble","Mangez le même fruit au même instant","Commandez le même repas ce soir"]},{cat:'🌿 Nature',items:["Regardez le ciel en même temps et décrivez ce que vous voyez","Ouvrez votre fenêtre et respirez le même air","Touchez la terre ou l'herbe au même moment"]},{cat:'💆 Bien-être',items:["Faites 5 minutes de méditation ensemble","Étirez-vous exactement en même temps","Prenez 3 respirations profondes ensemble"]},{cat:'✍️ Créatif',items:["Dessinez quelque chose qui représente l'autre en 2 minutes","Écrivez 3 mots qui décrivent votre journée maintenant","Photographiez l'endroit où vous êtes là maintenant"]},{cat:'🌙 Soir',items:["Allumez une bougie au même moment","Regardez le même coucher de soleil","Lisez la même page d'un livre ensemble"]}];
+function buildMM(){
+  const list=document.getElementById('mm-list');if(!list)return;list.innerHTML='';
+  const done=getJ('us_mmdone')||[];
+  MM.forEach(cat=>{
+    const h=document.createElement('div');h.style.cssText='font-size:.5rem;letter-spacing:.26em;text-transform:uppercase;color:var(--or);margin:10px 0 5px;font-family:sans-serif';h.textContent=cat.cat;list.appendChild(h);
+    cat.items.forEach(item=>{
+      const isDone=done.includes(item);
+      const el=document.createElement('div');
+      el.style.cssText=`display:flex;align-items:center;gap:12px;padding:13px;border-radius:10px;background:${isDone?'rgba(45,122,79,.06)':'var(--blanc)'};border:1px solid ${isDone?'rgba(45,122,79,.2)':'var(--creme2)'};cursor:pointer;transition:all .3s`;
+      el.innerHTML=`<div style="font-size:1.3rem;width:32px;text-align:center">${cat.cat.split(' ')[0]}</div><div style="flex:1;font-size:.76rem;color:var(--brun);line-height:1.5">${item}</div><div style="font-size:.9rem;color:var(--vert);opacity:${isDone?1:0};transition:opacity .3s">✓</div>`;
+      el.onclick=()=>{const d=getJ('us_mmdone')||[];if(!d.includes(item)){d.push(item);set('us_mmdone',d);gainXP(10);ckBdg('mm',true);toast('Moment partagé ! +10 XP')}el.style.background='rgba(45,122,79,.06)';el.style.borderColor='rgba(45,122,79,.2)';el.querySelector('div:last-child').style.opacity='1'};
+      list.appendChild(el);
+    });
+  });
+}
+
+// ===== MEMOIRE =====
+function addNote(){
+  const t=document.getElementById('note-in').value.trim();const who=document.getElementById('note-who').value||N1;
+  if(!t)return;
+  const now=new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
+  const notes=getJ('us_notes')||[];notes.unshift({t,who,time:now});set('us_notes',notes);cloudSave('us_notes',notes);
+  document.getElementById('note-in').value='';gainXP(8);renderNotes();
+}
+function renderNotes(){
+  const wall=document.getElementById('notes-wall');if(!wall)return;
+  const notes=getJ('us_notes')||[];
+  if(!notes.length){wall.innerHTML='<div style="text-align:center;color:var(--gris);font-style:italic;padding:28px">Vos premiers souvenirs apparaîtront ici… 🌸</div>';return}
+  const bgs=['#fff8e1','#fce4ec','#e8f5e9','#e3f2fd'];
+  const rots=['-1.2deg','.8deg','-.5deg','1.1deg'];
+  wall.innerHTML=notes.map((n,i)=>`
+    <div style="break-inside:avoid;margin-bottom:11px;border-radius:10px;padding:14px 13px;box-shadow:0 3px 10px rgba(46,26,18,.08);position:relative;animation:noteIn .4s ease;background:${bgs[i%4]};transform:rotate(${rots[i%4]})">
+      <button onclick="delNote(${i})" style="position:absolute;top:6px;right:8px;background:none;border:none;color:#9a8070;font-size:.68rem;cursor:pointer;opacity:.35" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.35">✕</button>
+      <div style="font-size:.46rem;letter-spacing:.2em;text-transform:uppercase;color:var(--or);margin-bottom:5px;font-family:sans-serif;font-weight:700">${n.who}</div>
+      <div style="font-size:.84rem;color:var(--brun);line-height:1.6;font-style:italic">${n.t}</div>
+      <div style="font-size:.42rem;color:var(--gris);margin-top:7px;font-family:sans-serif;text-align:right">${n.time}</div>
+    </div>`).join('');
+}
+function delNote(i){const n=getJ('us_notes')||[];n.splice(i,1);set('us_notes',n);renderNotes()}
+
+function saveLtr(){
+  const t=document.getElementById('ltr-text').value.trim();const who=document.getElementById('ltr-who').value||N1;const d=document.getElementById('ltr-date').value;
+  if(!t||!d){toast('Merci d\'écrire ta lettre et choisir une date');return}
+  const now=new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+  const ltrs=getJ('us_ltrs')||[];ltrs.unshift({t,who,d,created:now});set('us_ltrs',ltrs);cloudSave('us_ltrs',ltrs);
+  document.getElementById('ltr-text').value='';gainXP(20);ckBdg('ltr',true);renderLtrs();
+  toast('Lettre scellée ! S\'ouvrira le '+new Date(d).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}));
+}
+function renderLtrs(){
+  const list=document.getElementById('ltr-list');if(!list)return;
+  const d=getJ('us_ltrs')||[];
+  if(!d.length){list.innerHTML='<div style="text-align:center;color:var(--gris);font-style:italic;padding:14px;font-size:.78rem">Vos lettres scellées apparaîtront ici 💌</div>';return}
+  const now=new Date();
+  list.innerHTML=d.map(l=>{
+    const od=new Date(l.d);const canOpen=now>=od;
+    return `<div style="background:${canOpen?'var(--blanc)':'rgba(201,150,106,.04)'};border:1px solid ${canOpen?'var(--creme2)':'rgba(201,150,106,.2)'};border-radius:10px;padding:14px;position:relative">
+      <div style="position:absolute;right:12px;top:12px;font-size:1.1rem;opacity:.12">✉</div>
+      <div style="font-size:.46rem;letter-spacing:.18em;text-transform:uppercase;color:var(--or);font-family:sans-serif;margin-bottom:3px">✦ ${l.who} · Écrite le ${l.created}</div>
+      <div style="font-size:.6rem;color:var(--gris);font-family:sans-serif;margin-bottom:7px">📅 À ouvrir le ${od.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'})}</div>
+      ${canOpen?`<div style="font-size:.78rem;color:var(--brun);font-style:italic;line-height:1.6">${l.t}</div>`:`<div style="font-size:.7rem;color:var(--gris);font-style:italic">🔒 S'ouvrira dans ${Math.ceil((od-now)/864e5)} jours…</div>`}
+    </div>`;
+  }).join('');
+}
+function addBk(){
+  const t=document.getElementById('bk-in').value.trim();const cat=document.getElementById('bk-cat').value;if(!t)return;
+  const items=getJ('us_bk')||[];items.push({t,cat,done:false});set('us_bk',items);cloudSave('us_bk',items);
+  document.getElementById('bk-in').value='';gainXP(8);ckBdg('bkt',true);renderBk();
+}
+function toggleBk(i){const it=getJ('us_bk')||[];it[i].done=!it[i].done;set('us_bk',it);if(it[i].done){gainXP(25);toast('🎉 Objectif accompli ! +25 XP')}renderBk()}
+function delBk(i){const it=getJ('us_bk')||[];it.splice(i,1);set('us_bk',it);renderBk()}
+function renderBk(){
+  const list=document.getElementById('bk-list');if(!list)return;
+  const it=getJ('us_bk')||[];const done=it.filter(x=>x.done).length;const pct=it.length?Math.round(done/it.length*100):0;
+  const bf=document.getElementById('bk-bar');const bc=document.getElementById('bk-count');
+  if(bf)bf.style.width=pct+'%';if(bc)bc.textContent=done+' / '+it.length;
+  if(!it.length){list.innerHTML='<div style="text-align:center;color:var(--gris);font-style:italic;padding:14px">Votre bucket list apparaîtra ici ✈️</div>';return}
+  list.innerHTML=it.map((x,i)=>`
+    <div style="display:flex;align-items:center;gap:10px;background:${x.done?'rgba(45,122,79,.06)':'var(--blanc)'};border:1px solid ${x.done?'rgba(45,122,79,.2)':'var(--creme2)'};border-radius:9px;padding:12px">
+      <div onclick="toggleBk(${i})" style="width:20px;height:20px;border-radius:50%;border:2px solid ${x.done?'var(--vert)':'var(--or)'};background:${x.done?'var(--vert)':'transparent'};cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:#fff;flex-shrink:0">${x.done?'✓':''}</div>
+      <div style="flex:1"><div style="font-size:.78rem;color:${x.done?'var(--gris)':'var(--brun)'};${x.done?'text-decoration:line-through':''}">${x.t}</div><div style="font-size:.42rem;letter-spacing:.1em;text-transform:uppercase;color:var(--or);font-family:sans-serif;margin-top:2px">${x.cat}</div></div>
+      <button onclick="delBk(${i})" style="background:none;border:none;color:var(--gris);cursor:pointer;font-size:.68rem;opacity:.3" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.3">✕</button>
+    </div>`).join('');
+}
+function addDict(){
+  const m=document.getElementById('dc-mot').value.trim();const d=document.getElementById('dc-def').value.trim();const c=document.getElementById('dc-ctx').value.trim();
+  if(!m||!d){toast('Merci de remplir le mot et sa définition');return}
+  const now=new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'});
+  const dict=getJ('us_dict')||[];dict.unshift({m,d,c,date:now});set('us_dict',dict);cloudSave('us_dict',dict);
+  document.getElementById('dc-mot').value='';document.getElementById('dc-def').value='';document.getElementById('dc-ctx').value='';
+  gainXP(12);ckBdg('dct',true);renderDc();toast('Mot ajouté ✓');
+}
+function renderDc(){
+  const list=document.getElementById('dc-list');if(!list)return;
+  const d=getJ('us_dict')||[];
+  if(!d.length){list.innerHTML='<div style="text-align:center;color:var(--gris);font-style:italic;padding:14px;font-size:.78rem">Votre dictionnaire apparaîtra ici 📖</div>';return}
+  list.innerHTML=d.map(x=>`
+    <div style="background:var(--blanc);border:1px solid var(--creme2);border-radius:9px;padding:14px">
+      <div style="font-size:1.05rem;font-style:italic;color:var(--rouge);margin-bottom:3px">${x.m}</div>
+      <div style="font-size:.76rem;color:var(--brun);line-height:1.6;margin-bottom:5px">${x.d}</div>
+      ${x.c?`<div style="font-size:.62rem;color:var(--gris);font-style:italic">${x.c}</div>`:''}
+      <div style="font-size:.4rem;color:var(--gris);margin-top:5px;font-family:sans-serif">${x.date}</div>
+    </div>`).join('');
+}
+
+// ===== TOAST =====
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400)}
+
+// CSS inline
+const style=document.createElement('style');
+style.textContent=`@keyframes noteIn{from{opacity:0;transform:scale(.9)}to{opacity:1}}`;
+document.head.appendChild(style);
+</script>
+</body>
+</html>
